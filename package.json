@@ -1,0 +1,37 @@
+{
+  "name": "cookbook-app",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "description": "The cookbook app, including the web package, the server package, and the shared code.",
+  "scripts": {
+    "build": "npm run build -w @cookbook/shared && npm run build -w @cookbook/server && npm run build -w @cookbook/web",
+    "compile": "npm run compile -w @cookbook/shared && npm run compile -w @cookbook/server && npm run compile -w @cookbook/web",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "lint": "eslint .",
+    "typecheck": "npm run typecheck -w @cookbook/web -w @cookbook/server -w @cookbook/shared",
+    "test": "jest --config ./jest.config.cjs --passWithNoTests"
+  },
+  "author": "Tyler Bartschi",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.6.0",
+    "@typestrong/ts-mockito": "^2.7.12",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "prettier": "^3.8.3",
+    "ts-jest": "^29.4.9",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.58.0"
+  }
+}
