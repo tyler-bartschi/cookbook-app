@@ -11,30 +11,30 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Check out repo
-      uses: actions/checkout@v6
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
 
-    - name: Set up SAM CLI
-      uses: aws-actions/setup-sam@v2
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@v2
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v6
-      with:
-        role-to-assume: ${{ secrets.AWS_FRONTEND_INFRA_DEPLOY_ROLE_ARN }}
-        aws-region: us-east-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_FRONTEND_INFRA_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
 
-    - name: cd into Web Directory
-      run: |
-        cd packages/web
+      - name: cd into Web Directory
+        run: |
+          cd packages/web
 
-    - name: Run SAM Build
-      run: |
-        sam build
+      - name: Run SAM Build
+        run: |
+          sam build
 
-    - name: Run SAM Deploy
-      run: |
-        sam deploy \
-          --role-arn ${{ secrets.AWS_FRONTEND_INFRA_CLOUDFORMATION_ROLE_ARN }}
-          --no-confirm-changeset \
-          --no-fail-on-empty-changeset
+      - name: Run SAM Deploy
+        run: |
+          sam deploy \
+            --role-arn ${{ secrets.AWS_FRONTEND_INFRA_CLOUDFORMATION_ROLE_ARN }}
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset
