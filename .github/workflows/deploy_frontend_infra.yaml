@@ -36,7 +36,7 @@ jobs:
       - name: Run SAM Deploy
         run: |
           sam deploy \
-            --config-file samconfig.toml \
+            --config-file ../../samconfig.toml \
             --config-env default \
             --template-file .aws-sam/build/template.yaml \
             --role-arn ${{ secrets.AWS_FRONTEND_INFRA_CLOUDFORMATION_ROLE_ARN }} \
