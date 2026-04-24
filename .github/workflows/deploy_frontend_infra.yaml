@@ -1,0 +1,44 @@
+name: Deploy Cookbook Frontend Distribution
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/web
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_FRONTEND_INFRA_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Run SAM Build
+        run: |
+          sam build \
+            --config-file samconfig.toml \
+            --template-file template.yaml
+
+      - name: Run SAM Deploy
+        run: |
+          sam deploy \
+            --config-file samconfig.toml \
+            --config-env default \
+            --template-file .aws-sam/build/template.yaml \
+            --role-arn ${{ secrets.AWS_FRONTEND_INFRA_CLOUDFORMATION_ROLE_ARN }} \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset
