@@ -1,0 +1,9 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "cookbook-frontend"
+region = "us-east-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+resolve_s3 = true
+parameter_overrides = "HostedZoneId=Z00121032ZTEPA3U2MA1E SiteDomainName=cookbook.tylerbartschi.com SiteBucketName=tylerbartschi-cookbook-frontend"
