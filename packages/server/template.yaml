@@ -1,0 +1,261 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM config for the cookbook-backend
+
+Parameters:
+  MaxRCUs:
+    Type: Number
+    Default: 10
+  
+  MaxWCUs:
+    Type: Number
+    Default: 10
+
+Globals:
+  Function:
+    Runtime: nodejs24.x
+    CodeUri: ./dist/
+    Layers:
+      - !Ref cookbookLayer
+    Timeout: 30
+    MemorySize: 128
+
+Metadata:
+  x-common-policies: &commonPolicies
+    - AWSLambdaBasicExecutionRole
+    - AmazonSESFullAccess
+    - CloudWatchFullAccess
+    - AmazonDynamoDBFullAccess
+    - AmazonS3FullAccess
+    - AmazonSQSFullAccess
+
+  x-common-cors-headers: &commonCorsHeaders
+    method.response.header.Access-Control-Allow-Origin: "'*'"
+  
+  x-common-swagger-response-headers: &commonSwaggerResponseHeaders
+    Access-Control-Allow-Origin:
+      type: string
+
+Resources:
+  #
+  # APIGateway
+  #
+
+  #
+  # Lambda Layer
+  #
+
+
+  #
+  # Lambdas
+  #
+
+
+  #
+  # S3 Buckets
+  #
+  profilePicturesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: cookbook-profile-pictures-bartschi
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+
+  #
+  # Profile Picture CloudFront Stuff
+  #
+  profilePicturesOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-profile-pictures-oac"
+        Description: Access control for cookbook profile pictures S3 bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  profilePicturesDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub "${AWS::StackName} profile picture distribution"
+        HttpVersion: http2and3
+        PriceClass: PriceClass_100
+
+        Origins:
+          - Id: ProfilePicturesS3Origin
+            DomainName: !GetAtt profilePicturesBucket.RegionalDomainName
+            OriginAccessControlId: !Ref profilePicturesOAC
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        
+        DefaultCacheBehavior:
+          TargetOriginId: ProfilePicturesS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+  
+  profilePicturesBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref profilePicturesBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action:
+              - s3:GetObject
+            Resource: !Sub "${profilePicturesBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS::SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${profilePicturesDistribution}"
+
+  #
+  # DynamoDB Tables
+  #
+
+  cookbookUsers:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cookbook_users
+
+      BillingMode: PAY_PER_REQUEST
+      OnDemandThroughput:
+        MaxReadRequestUnits: !Ref MaxRCUs
+        MaxWriteRequestUnits: !Ref MaxWCUs
+
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH
+      
+      GlobalSecondaryIndexes:
+        - IndexName: cookbook_users_index
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          OnDemandThroughput:
+            MaxReadRequestUnits: !Ref MaxRCUs
+            MaxWriteRequestUnits: !Ref MaxWCUs
+
+  cookbookUserEmailUniqueness:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cookbook_user_email_uniqueness
+
+      BillingMode: PAY_PER_REQUEST
+      OnDemandThroughput:
+        MaxReadRequestUnits: !Ref MaxRCUs
+        MaxWriteRequestUnits: !Ref MaxWCUs
+      
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH        
+
+  cookbookLongTermAuth:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cookbook_long_term_auth
+
+      BillingMode: PAY_PER_REQUEST
+      OnDemandThroughput:
+        MaxReadRequestUnits: !Ref MaxRCUs
+        MaxWriteRequestUnits: !Ref MaxWCUs
+      
+      AttributeDefinitions:
+        - AttributeName: token_id
+          AttributeType: S
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: N
+      KeySchema:
+        - AttributeName: token_id
+          KeyType: HASH
+
+      TimeToLiveSpecification:
+        AttributeName: ttl_at
+        Enabled: true
+      
+      GlobalSecondaryIndexes:
+        - IndexName: cookbook_long_term_auth_index
+          KeySchema:
+            - AttributeName: username
+              KeyType: HASH
+            - AttributeName: created_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          OnDemandThroughput:
+            MaxReadRequestUnits: !Ref MaxRCUs
+            MaxWriteRequestUnits: !Ref MaxWCUs
+
+  cookbookShortTermAuth:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cookbook_short_term_auth
+
+      BillingMode: PAY_PER_REQUEST
+      OnDemandThroughput:
+        MaxReadRequestUnits: !Ref MaxRCUs
+        MaxWriteRequestUnits: !Ref MaxWCUs
+      
+      AttributeDefinitions:
+        - AttributeName: token_id
+          AttributeType: S
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: N
+      KeySchema:
+        - AttributeName: token_id
+          KeyType: HASH
+      
+      TimeToLiveSpecification:
+        AttributeName: ttl_at
+        Enabled: true
+      
+      GlobalSecondaryIndexes:
+        - IndexName: cookbook_short_term_auth_index
+          KeySchema:
+            - AttributeName: username
+              KeyType: HASH
+            - AttributeName: created_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          OnDemandThroughput:
+            MaxReadRequestUnits: !Ref MaxRCUs
+            MaxWriteRequestUnits: !Ref MaxWCUs

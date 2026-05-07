@@ -18,6 +18,9 @@ Client-side:
 *A user is associated with a list of favorited recipes and a list of posted recipes. I don't think we need to contain any of that info on the user itself, since the 
 username is a unique partition key and can be used in other tables for that purpose*
 
+
+**Note:** TTL must be in *seconds*, but milliseconds
+
 **Long Term Auth**
 
 Server-side:
@@ -69,7 +72,6 @@ username, and the following times: createdAt, lastUsedAt, expiresAt, revokedAt, 
 - ttlAt is for DynamoDB's TTL feature, normally this is set to whatever expiresAt is set to. When revoked, this will be set to the revokedAt time plus a short period, maybe a day.
 - The AuthToken is considered invalid if the current time exceeds the expiresAt or revokedAt time, considering the maximumTimeToLive as well.
 
-
 Register flow:
 
 - new user info is sent
@@ -78,6 +80,14 @@ Register flow:
 - returns the new short-term auth token (always)
 - returns the new long-term auth token (if remember me is selected)
 - returns an error if failed
+
+*Note:* When registering, it will be necessary to do a Transact Write on
+both the cookbook_users table and the cookbook_user_email_uniqueness table.
+This is so that if either operation fails, the entire operation fails. This
+enforces email uniqueness. When updating an email, add the new email
+to the uniqueness table, update it in the cookbook_users table, then delete the old
+one from the uniqueness table. This will likely require a condition on the command
+to write/put
 
 Register Request Object therefore needs to have:
 
@@ -152,7 +162,7 @@ Headers: Authorization: `Bearer ${short-term-auth-token}`
 
 ### Databases needed:
 
-**cookbook-users**
+**cookbook_users**
 
 Parition key: Username  
 Sort key: none
@@ -163,11 +173,17 @@ Sort key: none
 
 - Stores the users
 
-**cookbook-long-term-auth**
+**cookbook_user_email_uniqueness**
+
+Parition key: email
+Sort key: None
+
+**cookbook_long_term_auth**
 
 Partition key: tokenId  
 Sort key: none  
 TTL: ttlAt
+**Note:** TTL must be in *seconds*, but milliseconds
 
 GSI:  
 Partition key: username  
@@ -175,11 +191,12 @@ Sort key: createdAt
 
 - Stores the long-term auth tokens
 
-**cookbook-short-term-auth**
+**cookbook_short_term_auth**
 
 Partition key: tokenId  
 Sort key: none  
 TTL: ttlAt
+**Note:** TTL must be in *seconds*, but milliseconds
 
 GSI:  
 Parition key: username  
@@ -189,9 +206,12 @@ Sort Key: createdAt
 
 ### S3 Needed:
 
-**cookbook-profile-pictures**
+**cookbook_profile_pictures**
 
 - Only the lambda can access this bucket, using the lambda execution role
+- frontend access profile pictures through a CloudFront distribution, for 
+security and privacy
+- Need to set the CloudFront to the free plan once it gets pushed up
 
 ### Lambdas and Endpoints Needed:
 
@@ -204,3 +224,23 @@ Sort Key: createdAt
 - PATCH /user/{username}
 
 1 Lambda per endpoint, use Services and DAOs
+
+
+POST  /auth/register          201, 400, 409
+POST  /auth/login             200, 400, 401
+POST  /auth/logout            204, 401
+GET   /auth/me                200, 401
+GET   /user/{username}        200, 400, 401, 403, 404
+PATCH /user/{username}        200, 400, 401, 403, 404, 409
+POST  /auth/change-password   204, 400, 401, 422
+
+400 bad-request
+401 unauthorized
+403 forbidden
+404 not-found
+409 conflict
+422 validation-error
+500 internal-server-error
+
+
+**Note:** TTL must be in *seconds*, but milliseconds
