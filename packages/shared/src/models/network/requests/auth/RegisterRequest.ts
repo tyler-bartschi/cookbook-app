@@ -2,7 +2,7 @@ import { BaseRequest } from "../BaseRequest.js";
 
 /**
  * Endpoint: /auth/register
- * 
+ *
  * Profile image may be provided upon register, but is not required
  */
 export interface RegisterRequest extends BaseRequest {
