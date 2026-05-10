@@ -1,11 +1,13 @@
-import { PublicUserDto } from "../../../domain/dto/user/PublicUserDto.js";
-import { BaseResponse } from "../BaseResponse.js";
+import * as z from "zod";
+import { PublicUserDtoSchema } from "../../../domain/dto/user/PublicUserDto.js";
 
 /**
  * Endpoint: /user/{user_id}
  *
  * Returns a public user dto
  */
-export interface GetPublicUserResponse extends BaseResponse {
-  readonly user: PublicUserDto;
-}
+export const GetPublicUserResponseSchema = z.strictObject({
+  user: PublicUserDtoSchema,
+});
+
+export type GetPublicUserResponse = z.infer<typeof GetPublicUserResponseSchema>;

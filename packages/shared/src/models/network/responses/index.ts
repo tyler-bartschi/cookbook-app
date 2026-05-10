@@ -1,15 +1,25 @@
-export type { BaseResponse } from "./BaseResponse.js";
-
 // Auth
 
-export type { RegisterResponse } from "./auth/RegisterResponse.js";
-export type { LoginResponse } from "./auth/LoginResponse.js";
-export type { ChangePasswordResponse } from "./auth/ChangePasswordResponse.js";
+export { RegisterResponseSchema, type RegisterResponse } from "./auth/RegisterResponse.js";
+export { LoginResponseSchema, type LoginResponse } from "./auth/LoginResponse.js";
+export {
+  ChangePasswordResponseSchema,
+  type ChangePasswordResponse,
+} from "./auth/ChangePasswordResponse.js";
 
 // User
 
-export type { GetPublicUserResponse } from "./user/GetPublicUserResponse.js";
-export type { GetUserResponse } from "./user/GetUserResponse.js";
-export type { UpdateEmailResponse } from "./user/UpdateEmailResponse.js";
-export type { UpdateProfilePictureResponse } from "./user/UpdateProfilePictureResponse.js";
-export type { UpdateUsernameResponse } from "./user/UpdateUsernameResponse.js";
+export {
+  GetPublicUserResponseSchema,
+  type GetPublicUserResponse,
+} from "./user/GetPublicUserResponse.js";
+export { GetUserResponseSchema, type GetUserResponse } from "./user/GetUserResponse.js";
+export { UpdateEmailResponseSchema, type UpdateEmailResponse } from "./user/UpdateEmailResponse.js";
+export {
+  UpdateProfilePictureResponseSchema,
+  type UpdateProfilePictureResponse,
+} from "./user/UpdateProfilePictureResponse.js";
+export {
+  UpdateUsernameResponseSchema,
+  type UpdateUsernameResponse,
+} from "./user/UpdateUsernameResponse.js";

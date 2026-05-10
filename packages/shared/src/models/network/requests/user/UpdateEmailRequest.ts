@@ -1,11 +1,13 @@
-import { BaseRequest } from "../BaseRequest.js";
+import * as z from "zod";
 
 /**
  * Endpoint: /user/me/email
  *
  * Updates the user's email, requires password verification
  */
-export interface UpdateEmailRequest extends BaseRequest {
-  readonly newEmail: string;
-  readonly password: string;
-}
+export const UpdateEmailRequestSchema = z.strictObject({
+  newEmail: z.email(),
+  password: z.string().min(8).max(32),
+});
+
+export type UpdateEmailRequest = z.infer<typeof UpdateEmailRequestSchema>;

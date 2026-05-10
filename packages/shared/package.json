@@ -19,5 +19,8 @@
     "test": "jest --config ./jest.config.cjs --passWithNoTests"
   },
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
 }
