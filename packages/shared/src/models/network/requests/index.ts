@@ -5,7 +5,7 @@ export type { BaseRequest } from "./BaseRequest.js";
 export type { RegisterRequest } from "./auth/RegisterRequest.js";
 export type { LoginRequest } from "./auth/LoginRequest.js";
 export type { LogoutRequest } from "./auth/LogoutRequest.js";
-export type { ChangePasswordRequest } from "./auth/ChangePasswordRequest.js";
+export type { UpdatePasswordRequest } from "./auth/UpdatePasswordRequest.js";
 
 // User
 

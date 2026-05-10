@@ -5,7 +5,7 @@ import { BaseRequest } from "../BaseRequest.js";
  *
  * Sends the password and the new password to update
  */
-export interface ChangePasswordRequest extends BaseRequest {
+export interface UpdatePasswordRequest extends BaseRequest {
   readonly password: string;
   readonly newPassword: string;
 }
