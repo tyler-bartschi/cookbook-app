@@ -1,0 +1,5 @@
+// Necessary to get tests to recognize jest functions and keywords
+{
+  "extends": "../tsconfig.test.json",
+  "include": ["../src", "."]
+}
