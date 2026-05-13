@@ -106,15 +106,23 @@ describe("FieldValidator", () => {
 
     assertErrorHasMessageAndCode(validator, 400, validateErrorMessage);
   });
+
+  it("rejects an empty object", () => {
+    const validator = new FieldValidator("", baseTestSchema);
+
+    assertErrorHasMessageAndCode(validator, 400, jsonErrorMessage);
+  });
 });
 
 function assertObjectEqualsData<T extends z.ZodType>(
   validator: FieldValidator<T>,
   testObject: unknown,
 ) {
-  expect(validator.isValid).toBe(true);
-  expect(validator.error).toBeNull();
-  expect(validator.data).toStrictEqual(testObject);
+  const result = validator.result;
+
+  expect(result.isValid).toBe(true);
+  expect(result.error).toBeNull();
+  expect(result.data).toStrictEqual(testObject);
 }
 
 function assertErrorHasMessageAndCode<T extends z.ZodType>(
@@ -122,9 +130,11 @@ function assertErrorHasMessageAndCode<T extends z.ZodType>(
   expectedCode: number,
   expectedMessage: string,
 ) {
-  expect(validator.isValid).toBe(false);
-  expect(validator.data).toBeNull();
-  expect(validator.error?.headers).toBe(JSON.stringify(DEFAULT_CORS_HEADERS));
-  expect(validator.error?.statusCode).toBe(expectedCode);
-  expect(JSON.parse(validator.error?.body ?? "")?.message).toBe(expectedMessage);
+  const result = validator.result;
+
+  expect(result.isValid).toBe(false);
+  expect(result.data).toBeNull();
+  expect(result.error?.headers).toBe(JSON.stringify(DEFAULT_CORS_HEADERS));
+  expect(result.error?.statusCode).toBe(expectedCode);
+  expect(JSON.parse(result.error?.body ?? "")?.message).toBe(expectedMessage);
 }

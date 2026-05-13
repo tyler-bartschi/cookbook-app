@@ -2,10 +2,12 @@ import * as z from "zod";
 import { HttpResponse } from "../types/HttpResponse.js";
 import { DEFAULT_CORS_HEADERS } from "./DefaultCorsHeaders.js";
 
+export type ValidationResult<V> =
+  | { isValid: true; data: V; error: null }
+  | { isValid: false; data: null; error: HttpResponse };
+
 export class FieldValidator<T extends z.ZodType> {
-  private _isValid: boolean;
-  private _data: z.infer<T> | null;
-  private _error: HttpResponse | null;
+  private _result: ValidationResult<z.infer<T>>;
 
   /**
    * Validates given data and stores the results of the validation
@@ -20,9 +22,17 @@ export class FieldValidator<T extends z.ZodType> {
     validationSchema: T,
     additionalFields?: Record<string, unknown>,
   ) {
-    this._isValid = false;
-    this._data = null;
-    this._error = null;
+    this._result = {
+      isValid: false,
+      data: null,
+      error: {
+        statusCode: 400,
+        headers: JSON.stringify(DEFAULT_CORS_HEADERS),
+        body: JSON.stringify({
+          message: "Invalid request body",
+        }),
+      },
+    };
 
     const [cont, rawData]: [boolean, Partial<z.infer<T>>] = this.tryParse(objectToValidate);
 
@@ -39,24 +49,10 @@ export class FieldValidator<T extends z.ZodType> {
   }
 
   /**
-   * Returns true if validation was successful, false otherwise
-   */
-  public get isValid(): boolean {
-    return this._isValid;
-  }
-
-  /**
-   * Returns data if validation was successful, null otherwise
-   */
-  public get data(): z.infer<T> | null {
-    return this._data;
-  }
-
-  /**
-   * Returns the error if validation was unsuccessful, null otherwise
-   */
-  public get error(): HttpResponse | null {
-    return this._error;
+   * Returns the result object of the validation
+   */  
+  public get result(): ValidationResult<z.infer<T>> {
+    return this._result;
   }
 
   /**
@@ -71,7 +67,7 @@ export class FieldValidator<T extends z.ZodType> {
     } catch (error: unknown) {
       const msg: string = error instanceof Error ? error.message : String(error);
       console.error("An error occured:", msg);
-      this._error = {
+      this._result.error = {
         statusCode: 400,
         headers: JSON.stringify(DEFAULT_CORS_HEADERS),
         body: JSON.stringify({
@@ -93,7 +89,7 @@ export class FieldValidator<T extends z.ZodType> {
   private validate(fullRawData: unknown, validationSchema: T): void {
     const result = validationSchema.safeParse(fullRawData);
 
-    this._isValid = result.success;
+    this._result.isValid = result.success;
 
     if (!result.success) {
       const validationErrors = result.error.issues.map((issue) => {
@@ -104,7 +100,7 @@ export class FieldValidator<T extends z.ZodType> {
         };
       });
 
-      this._error = {
+      this._result.error = {
         statusCode: 400,
         headers: JSON.stringify(DEFAULT_CORS_HEADERS),
         body: JSON.stringify({
@@ -115,6 +111,7 @@ export class FieldValidator<T extends z.ZodType> {
       return;
     }
 
-    this._data = result.data;
+    this._result.error = null;
+    this._result.data = result.data;
   }
 }
