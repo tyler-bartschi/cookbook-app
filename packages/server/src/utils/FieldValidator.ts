@@ -27,7 +27,7 @@ export class FieldValidator<T extends z.ZodType> {
       data: null,
       error: {
         statusCode: 400,
-        headers: JSON.stringify(DEFAULT_CORS_HEADERS),
+        headers: DEFAULT_CORS_HEADERS,
         body: JSON.stringify({
           message: "Invalid request body",
         }),
@@ -69,7 +69,7 @@ export class FieldValidator<T extends z.ZodType> {
       console.error("An error occured:", msg);
       this._result.error = {
         statusCode: 400,
-        headers: JSON.stringify(DEFAULT_CORS_HEADERS),
+        headers: DEFAULT_CORS_HEADERS,
         body: JSON.stringify({
           error: error,
           message: "Invalid JSON request body",
@@ -102,7 +102,7 @@ export class FieldValidator<T extends z.ZodType> {
 
       this._result.error = {
         statusCode: 400,
-        headers: JSON.stringify(DEFAULT_CORS_HEADERS),
+        headers: DEFAULT_CORS_HEADERS,
         body: JSON.stringify({
           error: JSON.stringify(validationErrors),
           message: "Invalid request body",
