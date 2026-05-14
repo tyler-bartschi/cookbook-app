@@ -1,11 +1,11 @@
-export interface ImageDao {
+export interface ImageStorage {
   /**
    * Saves the image to storage bucket
-   * 
+   *
    * @param filename name of the image to upload
    * @param imageBytesAsBase64String image bytes
    * @param imageFileExtension image file extension, will be appended to the filename
-   * @returns The public bucket URL of the saved image
+   * @returns The public bucketURL of the saved image
    */
   uploadProfilePicture: (
     filename: string,
