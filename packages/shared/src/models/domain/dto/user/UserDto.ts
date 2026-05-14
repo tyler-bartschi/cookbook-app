@@ -5,6 +5,7 @@ export const UserDtoSchema = z.strictObject({
   username: z.string().min(3).max(32),
   email: z.email(),
   profilePictureUrl: z.url(),
+  createdAt: z.number(),
 });
 
 export type UserDto = z.infer<typeof UserDtoSchema>;
