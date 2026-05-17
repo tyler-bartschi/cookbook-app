@@ -134,7 +134,7 @@ function assertErrorHasMessageAndCode<T extends z.ZodType>(
 
   expect(result.isValid).toBe(false);
   expect(result.data).toBeNull();
-  expect(result.error?.headers).toBe(JSON.stringify(DEFAULT_CORS_HEADERS));
+  expect(result.error?.headers).toBe(DEFAULT_CORS_HEADERS);
   expect(result.error?.statusCode).toBe(expectedCode);
   expect(JSON.parse(result.error?.body ?? "")?.message).toBe(expectedMessage);
 }
