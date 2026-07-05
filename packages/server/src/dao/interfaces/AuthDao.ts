@@ -10,10 +10,26 @@ export interface AuthDao {
   createAuthToken: (token: AuthToken) => Promise<void>;
 
   /**
-   * Gets an AuthToken by a given ID
+   * Gets a short term AuthToken by a given ID
    * 
-   * @param tokenId tokenId of the AuthToken to retrieve
+   * @param tokenId short term tokenId of the AuthToken to retrieve
    * @returns The AuthToken if exists, null otherwise
    */
-  getAuthToken: (tokenId: string) => Promise<AuthToken | null>;
+  getShortTermAuthToken: (tokenId: string) => Promise<AuthToken | null>;
+
+  /**
+   * Gets a long term AuthToken by a given ID
+   * 
+   * @param tokenId long term tokenId of the AuthToken to retrieve
+   * @returns The AuthToken if exists, null otherwise
+   */
+  getLongTermAuthToken: (tokenId: string) => Promise<AuthToken | null>;
+
+  /**
+   * Updates an existing AuthToken in the database
+   * 
+   * @param token the AuthToken to update
+   * @returns void
+   */
+  updateAuthToken: (token: AuthToken) => Promise<void>;
 }
