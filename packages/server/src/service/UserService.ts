@@ -4,10 +4,14 @@
 
 import {
   AuthDto,
+  EmailLoginRequest,
+  LoginRequest,
+  LoginResponse,
   RegisterRequest,
   RegisterRequestWithImage,
   RegisterResponse,
   UserDto,
+  UsernameLoginRequest,
 } from "@cookbook/shared";
 import { DaoFactory } from "../dao/interfaces/factory/DaoFactory.js";
 import { UserDao } from "../dao/interfaces/UserDao.js";
@@ -125,6 +129,52 @@ export class UserService {
 
     return {
       user: newUser.toUserDto(),
+      shortTermAuth: shortTermAuthToken,
+    };
+  }
+
+  public async loginUser(request: LoginRequest): Promise<LoginResponse> {
+    let typeOfRequest: string = "email";
+    if ((request as UsernameLoginRequest).username) {
+      typeOfRequest = "username";
+    }
+
+    const user: User | null =
+      typeOfRequest === "email"
+        ? await this._userDao.getUserByEmail((request as EmailLoginRequest).email)
+        : await this._userDao.getUserByUsername((request as UsernameLoginRequest).username);
+
+    if (!user) {
+      throw new UserServiceError(
+        "Unauthorized: wrong username or email",
+        HTTP_CODES.get("unauthorized"),
+      );
+    }
+
+    const passwordsMatch: boolean = await bcrypt.compare(request.password, user.hashedPassword);
+
+    if (!passwordsMatch) {
+      throw new UserServiceError("Unauthorized: wrong password", HTTP_CODES.get("unauthorized"));
+    }
+
+    const shortTermAuthToken: AuthDto = await this._authService.createShortTermAuthToken(
+      user.userId,
+    );
+
+    if (request.rememberMe) {
+      const longTermAuthToken: AuthDto = await this._authService.createLongTermAuthToken(
+        user.userId,
+      );
+
+      return {
+        user: user.toUserDto(),
+        shortTermAuth: shortTermAuthToken,
+        longTermAuth: longTermAuthToken,
+      };
+    }
+
+    return {
+      user: user.toUserDto(),
       shortTermAuth: shortTermAuthToken,
     };
   }

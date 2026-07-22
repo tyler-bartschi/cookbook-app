@@ -6,7 +6,12 @@ export {
   type RegisterRequestWithImage,
   type RegisterRequestWithoutImage,
 } from "./auth/RegisterRequest.js";
-export { LoginRequestSchema, type LoginRequest } from "./auth/LoginRequest.js";
+export {
+  LoginRequestSchema,
+  type LoginRequest,
+  type UsernameLoginRequest,
+  type EmailLoginRequest,
+} from "./auth/LoginRequest.js";
 export { LogoutRequestSchema, type LogoutRequest } from "./auth/LogoutRequest.js";
 export {
   UpdatePasswordRequestSchema,

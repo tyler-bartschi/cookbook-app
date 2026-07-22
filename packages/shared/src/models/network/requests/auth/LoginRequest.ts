@@ -23,3 +23,5 @@ export const LoginRequestSchema = z.union([LoginWithEmailSchema, LoginWithUserna
  * Username OR email must be provided, but not both
  */
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
+export type UsernameLoginRequest = z.infer<typeof LoginWithUsernameSchema>;
+export type EmailLoginRequest = z.infer<typeof LoginWithEmailSchema>;
