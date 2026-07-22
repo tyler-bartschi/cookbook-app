@@ -3,6 +3,8 @@ export enum ErrorCode {
   DataAccess = "DataAccess",
   AuthService = "AuthService",
   UserParse = "UserParse",
+  ObjectUploadError = "ObjectUploadError",
+  ObjectDeleteError = "ObjectDeleteError",
 }
 
 export enum InformativeErrorCode {

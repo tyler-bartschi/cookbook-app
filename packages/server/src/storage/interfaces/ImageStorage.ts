@@ -12,4 +12,12 @@ export interface ImageStorage {
     imageBytesAsBase64String: string,
     imageFileExtension: string,
   ) => Promise<string>;
+
+  /**
+   * Deletes the image at the stored location
+   *
+   * @param filename name of the image to delete
+   * @returns void
+   */
+  deleteProfilePicture: (filename: string) => Promise<void>;
 }
