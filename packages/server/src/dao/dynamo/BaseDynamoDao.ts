@@ -1,4 +1,4 @@
-import { DataAccessError } from "../../model/errors/DataAccessError.js";
+import { DataAccessError } from "../../model/errors/error-code/DataAccessError.js";
 
 export class BaseDynamoDao {
   protected async doFailureReportingOperation<T>(

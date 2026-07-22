@@ -15,12 +15,12 @@ import { AuthTokenRow } from "../interfaces/rows/AuthTokenRow.js";
 
 export class DynamoAuthDao extends BaseDynamoDao implements AuthDao {
   private readonly _shortTermTableName: string = serverConfig.auth.shortTermTableName;
-  private readonly _shortTermIndexName: string = serverConfig.auth.shortTermIndexName;
+  // private readonly _shortTermIndexName: string = serverConfig.auth.shortTermIndexName;
   private readonly _longTermTableName: string = serverConfig.auth.longTermTableName;
-  private readonly _longTermIndexName: string = serverConfig.auth.longTermIndexName;
+  // private readonly _longTermIndexName: string = serverConfig.auth.longTermIndexName;
   private readonly _tablePartitionKey: string = serverConfig.auth.tablePartitionKey;
-  private readonly _indexPartitionKey: string = serverConfig.auth.indexPartitionKey;
-  private readonly _indexSortKey: string = serverConfig.auth.indexSortKey;
+  // private readonly _indexPartitionKey: string = serverConfig.auth.indexPartitionKey;
+  // private readonly _indexSortKey: string = serverConfig.auth.indexSortKey;
   private readonly _ttlKey: string = serverConfig.auth.ttlKey;
 
   private readonly _client = DynamoDBDocumentClient.from(new DynamoDBClient());

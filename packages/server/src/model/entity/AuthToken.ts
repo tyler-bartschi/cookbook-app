@@ -1,6 +1,6 @@
 import { serverConfig } from "../../config/serverConfig.js";
 import { AuthTokenRow } from "../../dao/interfaces/rows/AuthTokenRow.js";
-import { AuthParseError } from "../errors/AuthParseError.js";
+import { AuthParseError } from "../errors/error-code/AuthParseError.js";
 
 export type AuthTokenType = "long" | "short";
 

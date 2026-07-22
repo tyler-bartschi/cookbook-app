@@ -1,5 +1,10 @@
 export enum ErrorCode {
-  AuthParse,
-  DataAccess,
-  AuthService,
+  AuthParse = "AuthParse",
+  DataAccess = "DataAccess",
+  AuthService = "AuthService",
+  UserParse = "UserParse",
+}
+
+export enum InformativeErrorCode {
+  UserService = "UserService",
 }

@@ -3,12 +3,13 @@ import { AuthDao } from "../dao/interfaces/AuthDao.js";
 import { DaoFactory } from "../dao/interfaces/factory/DaoFactory.js";
 import { AuthToken, AuthTokenType } from "../model/entity/AuthToken.js";
 import { randomBytes, createHash } from "node:crypto";
-import { DataAccessError } from "../model/errors/DataAccessError.js";
-import { AuthServiceError } from "../model/errors/AuthServiceError.js";
+import { DataAccessError } from "../model/errors/error-code/DataAccessError.js";
+import { AuthServiceError } from "../model/errors/error-code/AuthServiceError.js";
 
 export interface AuthValidationResult {
   valid: boolean;
   reason: string;
+  userId?: string;
 }
 
 const MAXIMUM_TIME_TO_LIVE: number = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -50,13 +51,17 @@ export class AuthService {
   /**
    * Checks if the authToken is valid. Updates lastUsedAt, expiresAt, and ttlAt.
    *
-   * @param authDto the AuthDto the client sent for a given user
+   * @param tokenIdAndToken the token received from the client in the form of tokenId.token
+   * @param type the auth token type
    * @returns AuthValidationResult
    */
-  public async isAuthTokenValid(authDto: AuthDto): Promise<AuthValidationResult> {
+  public async isAuthTokenValid(
+    tokenIdAndToken: string,
+    type: AuthTokenType,
+  ): Promise<AuthValidationResult> {
     // authDto coming in has already been parsed and validated by zod in the handler
     // an AuthToken is valid when it is not expired, not revoked, the hashed tokens match, the userIds match, and it has not exceeded the maximum time to live
-    const { tokenId, rawToken, userId, type } = this.processAuthDto(authDto);
+    const { tokenId, rawToken } = this.processAuthToken(tokenIdAndToken);
     const hashedToken: string = this.hashToken(rawToken);
 
     const existingAuthToken: AuthToken | null =
@@ -68,12 +73,6 @@ export class AuthService {
       return {
         valid: false,
         reason: "No matching auth token",
-      };
-    }
-    if (userId !== existingAuthToken.userId) {
-      return {
-        valid: false,
-        reason: "User ids do not match",
       };
     }
     if (hashedToken !== existingAuthToken.hashedToken) {
@@ -126,17 +125,19 @@ export class AuthService {
     return {
       valid: true,
       reason: "Validation successful",
+      userId: existingAuthToken.userId,
     };
   }
 
   /**
    * Revokes the authToken, setting revokedAt and ttlAt
    *
-   * @param authDto the AuthDto the client sent for a given user
+   * @param tokenIdAndToken the token (tokenId.token) the client sent for a given user
+   * @param type: the type of the auth token (long or short)
    */
-  public async revokeAuthToken(authDto: AuthDto): Promise<void> {
+  public async revokeAuthToken(tokenIdAndToken: string, type: AuthTokenType): Promise<void> {
     // authDto coming in has already been parsed and validated by zod in the handler
-    const { tokenId, rawToken, userId, type } = this.processAuthDto(authDto);
+    const { tokenId, rawToken } = this.processAuthToken(tokenIdAndToken);
     const hashedToken: string = this.hashToken(rawToken);
 
     const existingAuthToken: AuthToken | null =
@@ -145,13 +146,6 @@ export class AuthService {
         : await this.authDao.getLongTermAuthToken(tokenId);
 
     if (!existingAuthToken) {
-      return;
-    }
-
-    if (existingAuthToken.userId !== userId) {
-      console.warn(
-        `An AuthToken attempting to be revoked did not belong to the user. AuthToken's userId: ${existingAuthToken.userId} !== Requesting userId: ${userId}`,
-      );
       return;
     }
 
@@ -210,18 +204,16 @@ export class AuthService {
   }
 
   /**
-   * Processes an AuthDto and returns its values
+   * Processes a token from the client and returns its values
    *
-   * @param authDto the AuthDto to process
-   * @returns The tokenId, rawToken, userId, and type destructured from the AuthDto
+   * @param token the token (tokenId.token) to process
+   * @returns The tokenId and rawToken
    */
-  private processAuthDto(authDto: AuthDto): {
+  private processAuthToken(token: string): {
     tokenId: string;
     rawToken: string;
-    userId: string;
-    type: AuthTokenType;
   } {
-    const [tokenId, rawToken] = authDto.authToken.split(".");
+    const [tokenId, rawToken] = token.split(".");
     if (!tokenId || !rawToken) {
       throw new AuthServiceError("AuthToken provided is malformed");
     }
@@ -229,8 +221,6 @@ export class AuthService {
     return {
       tokenId: tokenId.trim(),
       rawToken: rawToken.trim(),
-      userId: authDto.userId.trim(),
-      type: authDto.type,
     };
   }
 

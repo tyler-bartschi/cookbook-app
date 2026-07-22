@@ -1,5 +1,5 @@
-import { BaseError } from "./BaseError.js";
-import { ErrorCode } from "./ErrorCode.js";
+import { BaseError } from "../BaseError.js";
+import { ErrorCode } from "../ErrorCode.js";
 
 export class AuthParseError extends BaseError {
   constructor(message: string) {

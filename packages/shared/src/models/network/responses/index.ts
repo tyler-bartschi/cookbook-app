@@ -6,6 +6,7 @@ export {
   ChangePasswordResponseSchema,
   type ChangePasswordResponse,
 } from "./auth/ChangePasswordResponse.js";
+export { SessionResponseSchema, type SessionResponse } from "./auth/SessionResponse.js";
 
 // User
 
@@ -23,3 +24,7 @@ export {
   UpdateUsernameResponseSchema,
   type UpdateUsernameResponse,
 } from "./user/UpdateUsernameResponse.js";
+
+// Error
+
+export { ErrorResponseSchema, type ErrorResponse } from "./ErrorResponse.js";
