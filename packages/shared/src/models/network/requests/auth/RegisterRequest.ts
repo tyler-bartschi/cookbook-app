@@ -28,3 +28,5 @@ export const RegisterRequestSchema = z.union([
 ]);
 
 export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;
+export type RegisterRequestWithImage = z.infer<typeof RegisterRequestWithImageSchema>;
+export type RegisterRequestWithoutImage = z.infer<typeof RegisterRequestWithoutImageSchema>;

@@ -17,14 +17,14 @@ export class S3ImageStorage implements ImageStorage {
   ): Promise<string> {
     const params = {
       Bucket: this._bucketName,
-      Key: "profile-pictures/" + filename,
+      Key: `profile-pictures/${filename}.${imageFileExtension}`,
       Body: Buffer.from(imageBytesAsBase64String, "base64"),
       ContentType: `image/${imageFileExtension}`,
     };
 
     try {
       await this._client.send(new PutObjectCommand(params));
-      return `https://${this._bucketName}.s3.${this._bucketRegion}.amazonaws.com/profile-pictures/${filename}`;
+      return `https://${this._bucketName}.s3.${this._bucketRegion}.amazonaws.com/profile-pictures/${filename}.${imageFileExtension}`;
     } catch (error: unknown) {
       const message: string = error instanceof Error ? error.message : String(error);
       console.error(

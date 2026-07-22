@@ -17,7 +17,7 @@ export class User {
     username: string,
     email: string,
     hashedPassword: string,
-    profilePictureUrl: string = "",
+    profilePictureUrl: string,
     createdAt: Date,
     updatedAt: Date,
   ) {
