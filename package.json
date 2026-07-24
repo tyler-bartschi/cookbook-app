@@ -11,6 +11,7 @@
   },
   "scripts": {
     "clean": "npm run clean -w @cookbook/shared && npm run clean -w @cookbook/server && npm run clean -w @cookbook/web",
+    "build-deps": "npm run build -w @cookbook/shared",
     "build": "npm run build -w @cookbook/shared && npm run build -w @cookbook/server && npm run build -w @cookbook/web",
     "compile": "npm run compile -w @cookbook/shared && npm run compile -w @cookbook/server && npm run compile -w @cookbook/web",
     "format": "prettier . --write",
