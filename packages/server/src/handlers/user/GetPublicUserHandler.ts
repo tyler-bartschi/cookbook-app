@@ -6,7 +6,7 @@ import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-l
 import { initServices } from "../init.js";
 import { HttpResponseBuilder } from "../../utils/HttpResponseBuilder.js";
 import { HTTP_CODES } from "../../utils/HttpCodes.js";
-import { ErrorResponse, PublicUserDto } from "@cookbook/shared";
+import { ErrorResponse, GetPublicUserResponse, PublicUserDto } from "@cookbook/shared";
 import { APPLICATION_JSON_HEADER } from "../../utils/DefaultCorsHeaders.js";
 
 const { userService } = initServices();
@@ -34,8 +34,8 @@ export async function handler(
   }
 
   try {
-    const body: PublicUserDto = await userService.getPublicUser(type, id);
-    return HttpResponseBuilder.successfulJsonResponse(body);
+    const user: PublicUserDto = await userService.getPublicUser(type, id);
+    return HttpResponseBuilder.successfulJsonResponse({ user: user } as GetPublicUserResponse);
   } catch (error: unknown) {
     return HttpResponseBuilder.buildErrorResponse(error);
   }

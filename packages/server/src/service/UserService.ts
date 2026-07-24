@@ -28,6 +28,7 @@ import { createHash } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { UpdatePasswordResponse } from "../../../shared/dist/models/network/responses/auth/UpdatePasswordResponse.js";
+import { AuthTokenType } from "../model/entity/AuthToken.js";
 
 export class UserService {
   private readonly _userDao: UserDao;
@@ -46,31 +47,10 @@ export class UserService {
     userDto: UserDto;
     shortTermToken: AuthDto;
   }> {
-    const result: AuthValidationResult = await this._authService.isAuthTokenValid(
-      longTermAuthToken,
-      "long",
+    const user: User = await this.validateAuthAndReturnUser(longTermAuthToken, "long");
+    const shortTermAuthToken: AuthDto = await this._authService.createShortTermAuthToken(
+      user.userId,
     );
-
-    if (!result.valid) {
-      throw new UserServiceError(`Unauthorized: ${result.reason}`, HTTP_CODES.get("unauthorized"));
-    }
-
-    const userId: string | undefined = result.userId;
-    if (!userId) {
-      throw new UserServiceError(
-        `Internal error: No userId associated with AuthToken`,
-        HTTP_CODES.get("internal-server-error"),
-      );
-    }
-
-    const user: User | null = await this._userDao.getUserById(userId);
-    if (!user) {
-      throw new UserServiceError(
-        "Internal error: Failed to find user",
-        HTTP_CODES.get("internal-server-error"),
-      );
-    }
-    const shortTermAuthToken: AuthDto = await this._authService.createShortTermAuthToken(userId);
 
     return {
       userDto: user.toUserDto(),
@@ -207,35 +187,7 @@ export class UserService {
     shortTermAuthToken: string,
     updatePasswordRequest: UpdatePasswordRequest,
   ): Promise<UpdatePasswordResponse> {
-    const result: AuthValidationResult = await this._authService.isAuthTokenValid(
-      shortTermAuthToken,
-      "short",
-    );
-
-    if (!result.valid) {
-      throw new UserServiceError(
-        `Auth token no longer valid: ${result.reason}`,
-        HTTP_CODES.get("unauthorized"),
-      );
-    }
-
-    const userId: string | undefined = result.userId;
-
-    if (!userId) {
-      throw new UserServiceError(
-        "No userId associated with given auth token",
-        HTTP_CODES.get("internal-server-error"),
-      );
-    }
-
-    const user: User | null = await this._userDao.getUserById(userId);
-
-    if (!user) {
-      throw new UserServiceError(
-        "Failed to find user associated with userId",
-        HTTP_CODES.get("internal-server-error"),
-      );
-    }
+    const user: User = await this.validateAuthAndReturnUser(shortTermAuthToken, "short");
 
     const passwordsMatch: boolean = await bcrypt.compare(
       updatePasswordRequest.password,
@@ -289,5 +241,39 @@ export class UserService {
     }
 
     return user.toPublicUserDto();
+  }
+
+  public async getUser(shortTermAuthToken: string): Promise<UserDto> {
+    const user: User = await this.validateAuthAndReturnUser(shortTermAuthToken, "short");
+
+    return user.toUserDto();
+  }
+
+  private async validateAuthAndReturnUser(token: string, tokenType: AuthTokenType): Promise<User> {
+    const result: AuthValidationResult = await this._authService.isAuthTokenValid(token, tokenType);
+
+    if (!result.valid) {
+      throw new UserServiceError(`Unauthorized: ${result.reason}`, HTTP_CODES.get("unauthorized"));
+    }
+
+    const userId: string | undefined = result.userId;
+
+    if (!userId) {
+      throw new UserServiceError(
+        "Internal error: No userId associated with auth token",
+        HTTP_CODES.get("internal-server-error"),
+      );
+    }
+
+    const user: User | null = await this._userDao.getUserById(userId);
+
+    if (!user) {
+      throw new UserServiceError(
+        "Failed to find user associated with userId",
+        HTTP_CODES.get("internal-server-error"),
+      );
+    }
+
+    return user;
   }
 }
