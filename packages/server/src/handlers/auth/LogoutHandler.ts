@@ -1,23 +1,29 @@
 /**
- * Endpoint: /auth/session
+ * Endpoint: /auth/logout
  */
 
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
-import { HttpResponseBuilder } from "../../utils/HttpResponseBuilder.js";
 import { initServices } from "../init.js";
-import { SessionResponse } from "@cookbook/shared";
+import { FieldValidator } from "../../utils/FieldValidator.js";
+import { LogoutRequestSchema } from "@cookbook/shared";
 import {
   AuthorizationExistsResponse,
   validateAuthorizationExists,
 } from "../../utils/ValidateAuthorizationExists.js";
+import { HttpResponseBuilder } from "../../utils/HttpResponseBuilder.js";
+
+// headers can be involved with the FieldValidator, check if I should use that here or in the future
 
 const { userService } = initServices();
 
 export async function handler(
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyStructuredResultV2> {
-  // authorization in the form of `Bearer ${long-term-auth-token}`, parse to remove "Bearer"
-  // error handling must exist here to catch errors and parse into an HTTP response
+  const result = new FieldValidator(event.body ?? "{}", LogoutRequestSchema).result;
+
+  if (!result.isValid) {
+    return result.error;
+  }
 
   const authorization: string | undefined = event.headers?.authorization;
   const authorizationExists: AuthorizationExistsResponse =
@@ -28,15 +34,9 @@ export async function handler(
   }
 
   try {
-    const { userDto, shortTermToken } = await userService.validateSession(
-      authorizationExists.clientToken!,
-    );
-    return HttpResponseBuilder.successfulJsonResponse({
-      user: userDto,
-      shortTermAuth: shortTermToken,
-    } as SessionResponse);
+    await userService.logoutUser(authorizationExists.clientToken!, result.data);
+    return HttpResponseBuilder.buildCustomResponse(204);
   } catch (error: unknown) {
-    // use HttpResponseBuilder to build the error
     return HttpResponseBuilder.buildErrorResponse(error);
   }
 }

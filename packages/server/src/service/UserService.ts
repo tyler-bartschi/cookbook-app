@@ -7,6 +7,7 @@ import {
   EmailLoginRequest,
   LoginRequest,
   LoginResponse,
+  LogoutRequest,
   RegisterRequest,
   RegisterRequestWithImage,
   RegisterResponse,
@@ -177,5 +178,22 @@ export class UserService {
       user: user.toUserDto(),
       shortTermAuth: shortTermAuthToken,
     };
+  }
+
+  public async logoutUser(shortTermAuthToken: string, logoutRequest: LogoutRequest): Promise<void> {
+    const result: AuthValidationResult = await this._authService.isAuthTokenValid(
+      shortTermAuthToken,
+      "short",
+    );
+
+    if (!result.valid) {
+      throw new UserServiceError(`Auth token no longer valid`);
+    }
+
+    await this._authService.revokeAuthToken(shortTermAuthToken, "short");
+
+    if (logoutRequest.invalidateLongTermAuth) {
+      await this._authService.revokeAllLongTermAuthTokens(result.userId);
+    }
   }
 }

@@ -167,6 +167,27 @@ export class AuthService {
   }
 
   /**
+   * Revokes all the long term auth tokens for a given userId
+   *
+   * @param userId userId to revoke long term auth for
+   */
+  public async revokeAllLongTermAuthTokens(userId: string | undefined): Promise<void> {
+    if (userId === undefined) {
+      throw new AuthServiceError("No userId provided for a long term revokation operation");
+    }
+
+    const tokens: AuthToken[] = await this._authDao.getAllActiveLongTermAuthTokens(userId);
+
+    const now: number = Date.now();
+    tokens.forEach((token: AuthToken) => {
+      token.revokedAt = new Date(now);
+      token.ttlAt = now + ONE_DAY;
+    });
+
+    await this._authDao.updateMultipleAuthTokens(tokens);
+  }
+
+  /**
    * Creates the AuthToken, saves it in the databse, and returns the AuthDto for the client
    *
    * @param userId the userId the AuthToken belongs to

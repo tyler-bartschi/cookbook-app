@@ -17,7 +17,7 @@ export const serverConfig = {
     // The following is shared by both the long term and short term tables
     tablePartitionKey: "token_id",
     ttlKey: "ttl_at",
-    indexPartitionKey: "username",
+    indexPartitionKey: "user_id",
     indexSortKey: "created_at",
   },
   profilePictures: {

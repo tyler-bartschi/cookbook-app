@@ -14,7 +14,7 @@ export class FieldValidator<T extends z.ZodType> {
    *
    * @param objectToValidate string body to attempt to validate
    * @param validationSchema schema to use in validation (zod)
-   * @param additionalFields any additional fields that should be included in the validation (like headers)
+   * @param additionalFields any additional fields that should be included in the validation
    * @returns Nothing, stores results in instance variables
    */
   constructor(
