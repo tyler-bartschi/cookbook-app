@@ -1,6 +1,6 @@
 import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 import { HttpResponseBuilder } from "./HttpResponseBuilder.js";
-import { HTTP_CODES } from "../types/HttpCodes.js";
+import { HTTP_CODES } from "./HttpCodes.js";
 import { ErrorResponse } from "@cookbook/shared";
 import { APPLICATION_JSON_HEADER } from "./DefaultCorsHeaders.js";
 import { extractClientToken } from "./ExtractClientToken.js";

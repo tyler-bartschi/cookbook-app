@@ -1,12 +1,12 @@
 /**
- * Endpoint: /auth/register
+ * Endpoint: /user/{type}/{id}
  */
+
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
-import { FieldValidator } from "../../utils/FieldValidator.js";
-import { RegisterRequestSchema, RegisterResponse } from "@cookbook/shared";
 import { initServices } from "../init.js";
 import { HttpResponseBuilder } from "../../utils/HttpResponseBuilder.js";
 import { HTTP_CODES } from "../../utils/HttpCodes.js";
+import { ErrorResponse, PublicUserDto } from "@cookbook/shared";
 import { APPLICATION_JSON_HEADER } from "../../utils/DefaultCorsHeaders.js";
 
 const { userService } = initServices();
@@ -14,20 +14,28 @@ const { userService } = initServices();
 export async function handler(
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyStructuredResultV2> {
-  // Validate request body, return error if validation fails
-  const result = new FieldValidator(event.body ?? "", RegisterRequestSchema).result;
+  const type = event.pathParameters?.type;
+  const id = event.pathParameters?.id;
 
-  if (!result.isValid) {
-    return result.error;
+  if (!type) {
+    return HttpResponseBuilder.buildCustomResponse(
+      HTTP_CODES.get("bad-request")!,
+      { message: "type path parameter missing" } as ErrorResponse,
+      APPLICATION_JSON_HEADER,
+    );
+  }
+
+  if (!id) {
+    return HttpResponseBuilder.buildCustomResponse(
+      HTTP_CODES.get("bad-request")!,
+      { message: "id path parameter missing" } as ErrorResponse,
+      APPLICATION_JSON_HEADER,
+    );
   }
 
   try {
-    const body: RegisterResponse = await userService.registerUser(result.data);
-    return HttpResponseBuilder.buildCustomResponse(
-      HTTP_CODES.get("created")!,
-      body,
-      APPLICATION_JSON_HEADER,
-    );
+    const body: PublicUserDto = await userService.getPublicUser(type, id);
+    return HttpResponseBuilder.successfulJsonResponse(body);
   } catch (error: unknown) {
     return HttpResponseBuilder.buildErrorResponse(error);
   }

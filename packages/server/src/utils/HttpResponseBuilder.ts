@@ -1,7 +1,7 @@
 import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 import { APPLICATION_JSON_HEADER, DEFAULT_CORS_HEADERS } from "./DefaultCorsHeaders.js";
 import { isObject } from "./IsObject.js";
-import { HTTP_CODES } from "../types/HttpCodes.js";
+import { HTTP_CODES } from "./HttpCodes.js";
 import { BaseError } from "../model/errors/BaseError.js";
 import { ErrorCode, InformativeErrorCode } from "../model/errors/ErrorCode.js";
 

@@ -8,6 +8,7 @@ import {
   LoginRequest,
   LoginResponse,
   LogoutRequest,
+  PublicUserDto,
   RegisterRequest,
   RegisterRequestWithImage,
   RegisterResponse,
@@ -21,7 +22,7 @@ import { StorageFactory } from "../storage/interfaces/factory/StorageFactory.js"
 import { ImageStorage } from "../storage/interfaces/ImageStorage.js";
 import { AuthService, AuthValidationResult } from "./AuthService.js";
 import { UserServiceError } from "../model/errors/informative-error-code/UserServiceError.js";
-import { HTTP_CODES } from "../types/HttpCodes.js";
+import { HTTP_CODES } from "../utils/HttpCodes.js";
 import { User } from "../model/entity/User.js";
 import { createHash } from "node:crypto";
 import bcrypt from "bcryptjs";
@@ -270,5 +271,23 @@ export class UserService {
       shortTermAuth: newShortTermAuthToken,
       // longTermAuth: newLongTermAuthToken,
     };
+  }
+
+  public async getPublicUser(type: string, id: string): Promise<PublicUserDto> {
+    let user: User | null = null;
+
+    if (type === "username") {
+      user = await this._userDao.getUserByUsername(id);
+    } else if (type === "email") {
+      user = await this._userDao.getUserByEmail(id);
+    } else if (type === "userId") {
+      user = await this._userDao.getUserById(id);
+    }
+
+    if (!user) {
+      throw new UserServiceError(`The requested user does not exist`, HTTP_CODES.get("not-found"));
+    }
+
+    return user.toPublicUserDto();
   }
 }

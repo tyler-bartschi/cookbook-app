@@ -1,4 +1,4 @@
-import { UserDto } from "@cookbook/shared";
+import { PublicUserDto, UserDto } from "@cookbook/shared";
 import { EmailRow, UsernameRow, UserRow } from "../../dao/interfaces/rows/UserRow.js";
 import { createUserEmailPK, createUserIdPK, createUsernamePK } from "../../utils/UserUtils.js";
 import { UserParseError } from "../errors/error-code/UserParseError.js";
@@ -116,6 +116,13 @@ export class User {
       email: this.email,
       profilePictureUrl: this.profilePictureUrl,
       createdAt: this.createdAt.toISOString(),
+    };
+  }
+
+  public toPublicUserDto(): PublicUserDto {
+    return {
+      username: this.username,
+      profilePictureUrl: this.profilePictureUrl,
     };
   }
 

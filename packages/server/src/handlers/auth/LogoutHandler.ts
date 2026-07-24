@@ -11,6 +11,7 @@ import {
   validateAuthorizationExists,
 } from "../../utils/ValidateAuthorizationExists.js";
 import { HttpResponseBuilder } from "../../utils/HttpResponseBuilder.js";
+import { HTTP_CODES } from "../../utils/HttpCodes.js";
 
 // headers can be involved with the FieldValidator, check if I should use that here or in the future
 
@@ -35,7 +36,7 @@ export async function handler(
 
   try {
     await userService.logoutUser(authorizationExists.clientToken!, result.data);
-    return HttpResponseBuilder.buildCustomResponse(204);
+    return HttpResponseBuilder.buildCustomResponse(HTTP_CODES.get("no-content")!);
   } catch (error: unknown) {
     return HttpResponseBuilder.buildErrorResponse(error);
   }
