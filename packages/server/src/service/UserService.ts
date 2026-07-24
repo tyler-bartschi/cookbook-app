@@ -13,6 +13,7 @@ import {
   RegisterRequestWithImage,
   RegisterResponse,
   UpdatePasswordRequest,
+  UpdateProfilePictureRequest,
   UserDto,
   UsernameLoginRequest,
 } from "@cookbook/shared";
@@ -74,15 +75,21 @@ export class UserService {
     }
 
     let profilePictureUrl: string = "";
-    if ((request as RegisterRequestWithImage).imageBytesAsBase64String) {
-      const imageBytes: string = (request as RegisterRequestWithImage).imageBytesAsBase64String;
-      const filename: string = createHash("sha256").update(imageBytes).digest("hex");
+    try {
+      if ((request as RegisterRequestWithImage).imageBytesAsBase64String) {
+        const imageBytes: string = (request as RegisterRequestWithImage).imageBytesAsBase64String;
+        const filename: string = createHash("sha256").update(imageBytes).digest("hex");
 
-      profilePictureUrl = await this._imageStorage.uploadProfilePicture(
-        filename,
-        imageBytes,
-        (request as RegisterRequestWithImage).imageFileExtension,
-      );
+        profilePictureUrl = await this._imageStorage.uploadProfilePicture(
+          filename,
+          imageBytes,
+          (request as RegisterRequestWithImage).imageFileExtension,
+        );
+      }
+    } catch (error: unknown) {
+      const message: string = error instanceof Error ? error.message : String(error);
+      console.error("An error occurred when trying to upload a profile picture:", message);
+      profilePictureUrl = "";
     }
 
     const userId: string = uuidv4();
@@ -245,6 +252,52 @@ export class UserService {
 
   public async getUser(shortTermAuthToken: string): Promise<UserDto> {
     const user: User = await this.validateAuthAndReturnUser(shortTermAuthToken, "short");
+
+    return user.toUserDto();
+  }
+
+  public async updateProfilePicture(
+    shortTermAuthToken: string,
+    updateRequest: UpdateProfilePictureRequest,
+  ): Promise<UserDto> {
+    const user: User = await this.validateAuthAndReturnUser(shortTermAuthToken, "short");
+
+    const filename = createHash("sha256")
+      .update(updateRequest.imageBytesAsBase64String)
+      .digest("hex");
+    const newProfilePictureUrl = await this._imageStorage.uploadProfilePicture(
+      filename,
+      updateRequest.imageBytesAsBase64String,
+      updateRequest.imageFileExtension,
+    );
+
+    if (user.profilePictureUrl) {
+      try {
+        await this._imageStorage.deleteProfilePicture(user.profilePictureUrl);
+      } catch (error: unknown) {
+        // An error occurred trying to delete the old image, delete the new one and throw
+        console.error("An error occurred attempting to delete a profile picture:", error);
+
+        try {
+          await this._imageStorage.deleteProfilePicture(newProfilePictureUrl);
+        } catch (error: unknown) {
+          console.error("Rollback deletion of new profile picture failed:", error);
+        }
+
+        const message = error instanceof Error ? error.message : String(error);
+        throw new UserServiceError(
+          `An error occurred attempting to delete the old profile picture: ${message}`,
+          HTTP_CODES.get("internal-server-error"),
+        );
+      }
+    }
+    
+    const now = new Date(Date.now());
+
+    user.profilePictureUrl = newProfilePictureUrl;
+    user.updatedAt = now;
+
+    await this._userDao.updateUser(user);
 
     return user.toUserDto();
   }
