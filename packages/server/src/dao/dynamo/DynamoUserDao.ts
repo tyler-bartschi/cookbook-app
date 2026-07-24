@@ -94,18 +94,14 @@ export class DynamoUserDao extends BaseDynamoDao implements UserDao {
       Key: { [this._userPartitionKey]: createUserIdPK(user.userId) },
       ConditionExpression: "attribute_exists(#user_id)",
       UpdateExpression:
-        "SET #username = :username, #email = :email, #hashed_password = :hashed_password, #profile_picture_url = :profile_picture_url, #updated_at = :updated_at",
+        "SET #hashed_password = :hashed_password, #profile_picture_url = :profile_picture_url, #updated_at = :updated_at",
       ExpressionAttributeNames: {
         "#user_id": this._userPartitionKey,
-        "#username": "username",
-        "#email": "email",
         "#hashed_password": "hashed_password",
         "#profile_picture_url": "profile_picture_url",
         "#updated_at": "updated_at",
       },
       ExpressionAttributeValues: {
-        ":username": userRow.username,
-        ":email": userRow.email,
         ":hashed_password": userRow.hashed_password,
         ":profile_picture_url": userRow.profile_picture_url,
         ":updated_at": userRow.updated_at,
@@ -116,6 +112,106 @@ export class DynamoUserDao extends BaseDynamoDao implements UserDao {
       async () => await this._client.send(new UpdateCommand(params)),
       this._daoName,
     );
+  }
+
+  public async updateUsername(user: User, currentUsername: string): Promise<void> {
+    const userItem = user.toUserRow();
+    const usernameItem = user.toUsernameRow();
+
+    await this.doFailureReportingOperation(async () => {
+      await this._client.send(
+        new TransactWriteCommand({
+          ClientRequestToken: crypto.randomUUID(),
+          TransactItems: [
+            {
+              Put: {
+                TableName: this._userTableName,
+                Item: usernameItem,
+                ConditionExpression: "attribute_not_exists(#pk)",
+                ExpressionAttributeNames: { "#pk": this._userPartitionKey },
+              },
+            },
+            {
+              Update: {
+                TableName: this._userTableName,
+                Key: { [this._userPartitionKey]: userItem.pk },
+                ConditionExpression: "attribute_exists(#pk)",
+                UpdateExpression: "SET #username = :username, #updated_at = :updated_at",
+                ExpressionAttributeNames: {
+                  "#pk": this._userPartitionKey,
+                  "#username": "username",
+                  "#updated_at": "updated_at",
+                },
+                ExpressionAttributeValues: {
+                  ":username": userItem.username,
+                  ":updated_at": userItem.updated_at,
+                },
+              },
+            },
+            {
+              Delete: {
+                TableName: this._userTableName,
+                Key: { [this._userPartitionKey]: createUsernamePK(currentUsername) },
+                ConditionExpression: "attribute_exists(#pk)",
+                ExpressionAttributeNames: {
+                  "#pk": this._userPartitionKey,
+                },
+              },
+            },
+          ],
+        }),
+      );
+    }, this._daoName);
+  }
+
+  public async updateEmail(user: User, currentEmail: string): Promise<void> {
+    const userItem = user.toUserRow();
+    const emailItem = user.toEmailRow();
+
+    await this.doFailureReportingOperation(async () => {
+      await this._client.send(
+        new TransactWriteCommand({
+          ClientRequestToken: crypto.randomUUID(),
+          TransactItems: [
+            {
+              Put: {
+                TableName: this._userTableName,
+                Item: emailItem,
+                ConditionExpression: "attribute_not_exists(#pk)",
+                ExpressionAttributeNames: { "#pk": this._userPartitionKey },
+              },
+            },
+            {
+              Update: {
+                TableName: this._userTableName,
+                Key: { [this._userPartitionKey]: userItem.pk },
+                ConditionExpression: "attribute_exists(#pk)",
+                UpdateExpression: "SET #email = :email, #updated_at = :updated_at",
+                ExpressionAttributeNames: {
+                  "#pk": this._userPartitionKey,
+                  "#email": "email",
+                  "#updated_at": "updated_at",
+                },
+                ExpressionAttributeValues: {
+                  ":email": userItem.email,
+                  ":updated_at": userItem.updated_at,
+                },
+              },
+            },
+            {
+              Delete: {
+                TableName: this._userTableName,
+                Key: { [this._userPartitionKey]: createUserEmailPK(currentEmail) },
+                ConditionExpression: "attribute_exists(#pk)",
+                ExpressionAttributeNames: {
+                  "#pk": this._userPartitionKey,
+                },
+              },
+            },
+          ],
+        }),
+      );
+    }, this._daoName);
   }
 
   private async getUserByLookup(pk: string): Promise<User | null> {

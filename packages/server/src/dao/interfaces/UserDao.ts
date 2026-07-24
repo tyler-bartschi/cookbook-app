@@ -35,10 +35,28 @@ export interface UserDao {
   createUser: (user: User) => Promise<void>;
 
   /**
-   * Updates a given user in the database
+   * Updates a given user in the database, but only profilePictureUrl, password, and updatedAt
    * 
    * @param user The user to update (with updated fields)
    * @returns void
    */
   updateUser: (user: User) => Promise<void>;
+
+  /**
+   * Updates a user's username, along with the associated lookups
+   * 
+   * @param user The user with the new information to save
+   * @param currentUsername the current username associated with the user (not the new one)
+   * @returns void
+   */
+  updateUsername: (user: User, currentUsername: string) => Promise<void>;
+
+  /**
+   * Updates a user's email, along with the associated lookups
+   * 
+   * @param user the user with the new information to save
+   * @param currentEmail the current email associated with the user (not the new one)
+   * @returns void
+   */
+  updateEmail: (user: User, currentEmail: string) => Promise<void>;
 }

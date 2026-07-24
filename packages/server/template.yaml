@@ -54,6 +54,9 @@ Resources:
   #
   # S3 Buckets
   #
+  # TODO: If profile pictures should be readable through direct S3 object URLs,
+  # this bucket needs Block Public Access settings that allow public policies,
+  # plus a bucket policy statement allowing s3:GetObject under profile-pictures/*.
   profilePicturesBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -137,8 +140,12 @@ Resources:
   # DynamoDB Tables
   #
 
+  # TABLES ARE NOT CURRENT WITH THE SCHEMA...THEY NEED TO BE UPDATED FULLY
+
   cookbookUsers:
     Type: AWS::DynamoDB::Table
+    # TODO: Align this table's key schema with UserRow before deployment:
+    # the partition key needs to switch from "username" to "pk".
     Properties:
       TableName: cookbook_users
 
@@ -167,25 +174,11 @@ Resources:
             MaxReadRequestUnits: !Ref MaxRCUs
             MaxWriteRequestUnits: !Ref MaxWCUs
 
-  cookbookUserEmailUniqueness:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: cookbook_user_email_uniqueness
-
-      BillingMode: PAY_PER_REQUEST
-      OnDemandThroughput:
-        MaxReadRequestUnits: !Ref MaxRCUs
-        MaxWriteRequestUnits: !Ref MaxWCUs
-      
-      AttributeDefinitions:
-        - AttributeName: email
-          AttributeType: S
-      KeySchema:
-        - AttributeName: email
-          KeyType: HASH        
-
   cookbookLongTermAuth:
     Type: AWS::DynamoDB::Table
+    # TODO: Align this table's GSI schema with AuthTokenRow before deployment:
+    # replace the "username" GSI partition key with "user_id", and change
+    # "created_at" from AttributeType N to S because it is stored as an ISO string.
     Properties:
       TableName: cookbook_long_term_auth
 
@@ -224,6 +217,10 @@ Resources:
 
   cookbookShortTermAuth:
     Type: AWS::DynamoDB::Table
+    # TODO: Align this table's GSI schema with AuthTokenRow before deployment:
+    # replace the "username" GSI partition key with "user_id", and change
+    # "created_at" from AttributeType N to S because it is stored as an ISO string.
+    # The short-term auth GSI should use user_id as the HASH key and created_at as the RANGE key.
     Properties:
       TableName: cookbook_short_term_auth
 

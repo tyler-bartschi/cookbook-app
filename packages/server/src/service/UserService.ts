@@ -12,8 +12,10 @@ import {
   RegisterRequest,
   RegisterRequestWithImage,
   RegisterResponse,
+  UpdateEmailRequest,
   UpdatePasswordRequest,
   UpdateProfilePictureRequest,
+  UpdateUsernameRequest,
   UserDto,
   UsernameLoginRequest,
 } from "@cookbook/shared";
@@ -142,11 +144,7 @@ export class UserService {
       );
     }
 
-    const passwordsMatch: boolean = await bcrypt.compare(request.password, user.hashedPassword);
-
-    if (!passwordsMatch) {
-      throw new UserServiceError("Unauthorized: wrong password", HTTP_CODES.get("unauthorized"));
-    }
+    await this.comparePasswords(request.password, user.hashedPassword);
 
     const shortTermAuthToken: AuthDto = await this._authService.createShortTermAuthToken(
       user.userId,
@@ -196,14 +194,7 @@ export class UserService {
   ): Promise<UpdatePasswordResponse> {
     const user: User = await this.validateAuthAndReturnUser(shortTermAuthToken, "short");
 
-    const passwordsMatch: boolean = await bcrypt.compare(
-      updatePasswordRequest.password,
-      user.hashedPassword,
-    );
-
-    if (!passwordsMatch) {
-      throw new UserServiceError("Unauthorized: wrong password", HTTP_CODES.get("unauthorized"));
-    }
+    await this.comparePasswords(updatePasswordRequest.password, user.hashedPassword);
 
     const newHashedPassword: string = await bcrypt.hash(
       updatePasswordRequest.newPassword,
@@ -291,13 +282,69 @@ export class UserService {
         );
       }
     }
-    
+
     const now = new Date(Date.now());
 
     user.profilePictureUrl = newProfilePictureUrl;
     user.updatedAt = now;
 
     await this._userDao.updateUser(user);
+
+    return user.toUserDto();
+  }
+
+  public async updateUsername(
+    shortTermAuthToken: string,
+    updateRequest: UpdateUsernameRequest,
+  ): Promise<UserDto> {
+    return await this.updateUserItem(
+      shortTermAuthToken,
+      { password: updateRequest.password, newField: updateRequest.newUsername },
+      "username",
+      async (key: string) => await this._userDao.getUserByUsername(key),
+      async (user: User, currentItem: string) =>
+        await this._userDao.updateUsername(user, currentItem),
+    );
+  }
+
+  public async updateEmail(
+    shortTermAuthToken: string,
+    updateRequest: UpdateEmailRequest,
+  ): Promise<UserDto> {
+    return await this.updateUserItem(
+      shortTermAuthToken,
+      { password: updateRequest.password, newField: updateRequest.newEmail },
+      "email",
+      async (key: string) => await this._userDao.getUserByEmail(key),
+      async (user: User, currentItem: string) => await this._userDao.updateEmail(user, currentItem),
+    );
+  }
+
+  private async updateUserItem(
+    shortTermAuthToken: string,
+    request: { password: string; newField: string },
+    field: string,
+    getOperation: (key: string) => Promise<User | null>,
+    updateOperation: (user: User, currentItem: string) => Promise<void>,
+  ): Promise<UserDto> {
+    const user: User = await this.validateAuthAndReturnUser(shortTermAuthToken, "short");
+
+    await this.comparePasswords(request.password, user.hashedPassword);
+
+    const exists: User | null = await getOperation(request.newField);
+    if (exists && exists[field as "email" | "username"] === request.newField) {
+      throw new UserServiceError(`${request.newField} is already your current ${field}`, HTTP_CODES.get("bad-request"));
+    }
+    if (exists) {
+      throw new UserServiceError(`That ${field} is already in use`, HTTP_CODES.get("conflict"));
+    }
+
+    const currentItem: string = user[field as "email" | "username"];
+    const now = new Date(Date.now());
+    user[field as "email" | "username"] = request.newField;
+    user.updatedAt = now;
+
+    await updateOperation(user, currentItem);
 
     return user.toUserDto();
   }
@@ -328,5 +375,20 @@ export class UserService {
     }
 
     return user;
+  }
+
+  /**
+   * Given a password and a hash, compares to see if they're equal. Throws if they are not
+   *
+   * @param password client provided password
+   * @param hash stored password hash in the database
+   * @returns void, throws if comparison fails
+   */
+  private async comparePasswords(password: string, hash: string): Promise<void> {
+    const passwordsMatch: boolean = await bcrypt.compare(password, hash);
+
+    if (!passwordsMatch) {
+      throw new UserServiceError("Unauthorized: wrong password", HTTP_CODES.get("unauthorized"));
+    }
   }
 }
