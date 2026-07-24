@@ -11,6 +11,7 @@ import {
   RegisterRequest,
   RegisterRequestWithImage,
   RegisterResponse,
+  UpdatePasswordRequest,
   UserDto,
   UsernameLoginRequest,
 } from "@cookbook/shared";
@@ -25,6 +26,7 @@ import { User } from "../model/entity/User.js";
 import { createHash } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
+import { UpdatePasswordResponse } from "../../../shared/dist/models/network/responses/auth/UpdatePasswordResponse.js";
 
 export class UserService {
   private readonly _userDao: UserDao;
@@ -187,7 +189,10 @@ export class UserService {
     );
 
     if (!result.valid) {
-      throw new UserServiceError(`Auth token no longer valid`);
+      throw new UserServiceError(
+        `Auth token no longer valid: ${result.reason}`,
+        HTTP_CODES.get("unauthorized"),
+      );
     }
 
     await this._authService.revokeAuthToken(shortTermAuthToken, "short");
@@ -195,5 +200,75 @@ export class UserService {
     if (logoutRequest.invalidateLongTermAuth) {
       await this._authService.revokeAllLongTermAuthTokens(result.userId);
     }
+  }
+
+  public async updatePassword(
+    shortTermAuthToken: string,
+    updatePasswordRequest: UpdatePasswordRequest,
+  ): Promise<UpdatePasswordResponse> {
+    const result: AuthValidationResult = await this._authService.isAuthTokenValid(
+      shortTermAuthToken,
+      "short",
+    );
+
+    if (!result.valid) {
+      throw new UserServiceError(
+        `Auth token no longer valid: ${result.reason}`,
+        HTTP_CODES.get("unauthorized"),
+      );
+    }
+
+    const userId: string | undefined = result.userId;
+
+    if (!userId) {
+      throw new UserServiceError(
+        "No userId associated with given auth token",
+        HTTP_CODES.get("internal-server-error"),
+      );
+    }
+
+    const user: User | null = await this._userDao.getUserById(userId);
+
+    if (!user) {
+      throw new UserServiceError(
+        "Failed to find user associated with userId",
+        HTTP_CODES.get("internal-server-error"),
+      );
+    }
+
+    const passwordsMatch: boolean = await bcrypt.compare(
+      updatePasswordRequest.password,
+      user.hashedPassword,
+    );
+
+    if (!passwordsMatch) {
+      throw new UserServiceError("Unauthorized: wrong password", HTTP_CODES.get("unauthorized"));
+    }
+
+    const newHashedPassword: string = await bcrypt.hash(
+      updatePasswordRequest.newPassword,
+      this.saltRounds,
+    );
+
+    const now = new Date(Date.now());
+    user.hashedPassword = newHashedPassword;
+    user.updatedAt = now;
+
+    await this._userDao.updateUser(user);
+
+    await this._authService.revokeAuthToken(shortTermAuthToken, "short");
+    await this._authService.revokeAllLongTermAuthTokens(user.userId);
+
+    const newShortTermAuthToken: AuthDto = await this._authService.createShortTermAuthToken(
+      user.userId,
+    );
+    // const newLongTermAuthToken: AuthDto = await this._authService.createLongTermAuthToken(
+    //   user.userId,
+    // );
+
+    return {
+      shortTermAuth: newShortTermAuthToken,
+      // longTermAuth: newLongTermAuthToken,
+    };
   }
 }

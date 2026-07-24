@@ -33,4 +33,12 @@ export interface UserDao {
    * @returns void
    */
   createUser: (user: User) => Promise<void>;
+
+  /**
+   * Updates a given user in the database
+   * 
+   * @param user The user to update (with updated fields)
+   * @returns void
+   */
+  updateUser: (user: User) => Promise<void>;
 }

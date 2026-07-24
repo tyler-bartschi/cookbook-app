@@ -1,4 +1,9 @@
-import { DynamoDBDocumentClient, GetCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  TransactWriteCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { User } from "../../model/entity/User.js";
 import { UserDao } from "../interfaces/UserDao.js";
 import { BaseDynamoDao } from "./BaseDynamoDao.js";
@@ -80,6 +85,37 @@ export class DynamoUserDao extends BaseDynamoDao implements UserDao {
         }),
       );
     }, this._daoName);
+  }
+
+  public async updateUser(user: User): Promise<void> {
+    const userRow: UserRow = user.toUserRow();
+    const params = {
+      TableName: this._userTableName,
+      Key: { [this._userPartitionKey]: createUserIdPK(user.userId) },
+      ConditionExpression: "attribute_exists(#user_id)",
+      UpdateExpression:
+        "SET #username = :username, #email = :email, #hashed_password = :hashed_password, #profile_picture_url = :profile_picture_url, #updated_at = :updated_at",
+      ExpressionAttributeNames: {
+        "#user_id": this._userPartitionKey,
+        "#username": "username",
+        "#email": "email",
+        "#hashed_password": "hashed_password",
+        "#profile_picture_url": "profile_picture_url",
+        "#updated_at": "updated_at",
+      },
+      ExpressionAttributeValues: {
+        ":username": userRow.username,
+        ":email": userRow.email,
+        ":hashed_password": userRow.hashed_password,
+        ":profile_picture_url": userRow.profile_picture_url,
+        ":updated_at": userRow.updated_at,
+      },
+    };
+
+    await this.doFailureReportingOperation(
+      async () => await this._client.send(new UpdateCommand(params)),
+      this._daoName,
+    );
   }
 
   private async getUserByLookup(pk: string): Promise<User | null> {

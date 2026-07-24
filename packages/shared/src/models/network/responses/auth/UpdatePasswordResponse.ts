@@ -2,13 +2,13 @@ import * as z from "zod";
 import { AuthDtoSchema } from "../../../domain/dto/auth/AuthDto.js";
 
 /**
- * Endpoint: /auth/change-password
+ * Endpoint: /auth/update-password
  *
  * Returns the new AuthDtos for that user
  */
-export const ChangePasswordResponseSchema = z.strictObject({
+export const UpdatePasswordResponseSchema = z.strictObject({
   shortTermAuth: AuthDtoSchema,
   longTermAuth: AuthDtoSchema.optional(),
 });
 
-export type ChangePasswordResponse = z.infer<typeof ChangePasswordResponseSchema>;
+export type UpdatePasswordResponse = z.infer<typeof UpdatePasswordResponseSchema>;

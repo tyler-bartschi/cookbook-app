@@ -3,9 +3,9 @@
 export { RegisterResponseSchema, type RegisterResponse } from "./auth/RegisterResponse.js";
 export { LoginResponseSchema, type LoginResponse } from "./auth/LoginResponse.js";
 export {
-  ChangePasswordResponseSchema,
-  type ChangePasswordResponse,
-} from "./auth/ChangePasswordResponse.js";
+  UpdatePasswordResponseSchema as ChangePasswordResponseSchema,
+  type UpdatePasswordResponse as ChangePasswordResponse,
+} from "./auth/UpdatePasswordResponse.js";
 export { SessionResponseSchema, type SessionResponse } from "./auth/SessionResponse.js";
 
 // User
