@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { UsernameSchema } from "../../../domain/UsernameSchema.js";
 
 /**
  * Endpoint: /user/me/username
@@ -6,7 +7,7 @@ import * as z from "zod";
  * Updates the user's username, requires password verification
  */
 export const UpdateUsernameRequestSchema = z.strictObject({
-  newUsername: z.string().min(3).max(32),
+  newUsername: UsernameSchema,
   password: z.string().min(8).max(32),
 });
 

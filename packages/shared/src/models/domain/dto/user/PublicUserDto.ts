@@ -1,7 +1,8 @@
 import * as z from "zod";
+import { UsernameSchema } from "../../UsernameSchema.js";
 
 export const PublicUserDtoSchema = z.strictObject({
-  username: z.string().min(3).max(32),
+  username: UsernameSchema,
   profilePictureUrl: z.union([z.literal(""), z.url()]),
 });
 

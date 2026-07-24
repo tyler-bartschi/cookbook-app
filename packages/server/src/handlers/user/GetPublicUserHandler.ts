@@ -34,7 +34,10 @@ export async function handler(
   }
 
   try {
-    const user: PublicUserDto = await userService.getPublicUser(type, id);
+    const user: PublicUserDto = await userService.getPublicUser(
+      type.trim().toLowerCase(),
+      id.trim().toLowerCase(),
+    );
     return HttpResponseBuilder.successfulJsonResponse({ user: user } as GetPublicUserResponse);
   } catch (error: unknown) {
     return HttpResponseBuilder.buildErrorResponse(error);

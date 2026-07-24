@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { EmailSchema } from "../../../domain/EmailSchema.js";
 
 /**
  * Endpoint: /user/me/email
@@ -6,7 +7,7 @@ import * as z from "zod";
  * Updates the user's email, requires password verification
  */
 export const UpdateEmailRequestSchema = z.strictObject({
-  newEmail: z.email(),
+  newEmail: EmailSchema,
   password: z.string().min(8).max(32),
 });
 

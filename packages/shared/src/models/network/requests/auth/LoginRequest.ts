@@ -1,4 +1,6 @@
 import * as z from "zod";
+import { EmailSchema } from "../../../domain/EmailSchema.js";
+import { UsernameSchema } from "../../../domain/UsernameSchema.js";
 
 const BaseLoginRequestSchema = {
   password: z.string().min(8).max(32),
@@ -7,12 +9,12 @@ const BaseLoginRequestSchema = {
 
 const LoginWithEmailSchema = z.strictObject({
   ...BaseLoginRequestSchema,
-  email: z.email(),
+  email: EmailSchema,
 });
 
 const LoginWithUsernameSchema = z.strictObject({
   ...BaseLoginRequestSchema,
-  username: z.string().min(3).max(32),
+  username: UsernameSchema,
 });
 
 export const LoginRequestSchema = z.union([LoginWithEmailSchema, LoginWithUsernameSchema]);

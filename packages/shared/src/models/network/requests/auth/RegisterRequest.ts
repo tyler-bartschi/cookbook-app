@@ -1,4 +1,6 @@
 import * as z from "zod";
+import { EmailSchema } from "../../../domain/EmailSchema.js";
+import { UsernameSchema } from "../../../domain/UsernameSchema.js";
 
 /**
  * Endpoint: /auth/register
@@ -6,8 +8,8 @@ import * as z from "zod";
  * Profile image may be provided upon register, but is not required
  */
 const BaseRegisterRequestShape = {
-  username: z.string().min(3).max(32),
-  email: z.email(),
+  username: UsernameSchema,
+  email: EmailSchema,
   password: z.string().min(8).max(32),
   rememberMe: z.boolean(),
 };
