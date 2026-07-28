@@ -14,49 +14,380 @@ Parameters:
 Globals:
   Function:
     Runtime: nodejs24.x
-    CodeUri: ./dist/
-    Layers:
-      - !Ref cookbookLayer
     Timeout: 30
     MemorySize: 128
-
-Metadata:
-  x-common-policies: &commonPolicies
-    - AWSLambdaBasicExecutionRole
-    - AmazonSESFullAccess
-    - CloudWatchFullAccess
-    - AmazonDynamoDBFullAccess
-    - AmazonS3FullAccess
-    - AmazonSQSFullAccess
-
-  x-common-cors-headers: &commonCorsHeaders
-    method.response.header.Access-Control-Allow-Origin: "'*'"
-  
-  x-common-swagger-response-headers: &commonSwaggerResponseHeaders
-    Access-Control-Allow-Origin:
-      type: string
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        USERS_DB_NAME: !Ref cookbookUsers
+        LONG_TERM_AUTH_DB_NAME: !Ref cookbookLongTermAuth
+        LONG_TERM_AUTH_DB_INDEX_NAME: cookbook_long_term_auth_index
+        SHORT_TERM_AUTH_DB_NAME: !Ref cookbookShortTermAuth
+        SHORT_TERM_AUTH_DB_INDEX_NAME: cookbook_short_term_auth_index
+        PROFILE_PICTURE_S3_BUCKET_NAME: !Ref profilePicturesBucket
+        PROFILE_PICTURE_CLOUDFRONT_BASE_URL: !Sub "https://${profilePicturesDistribution.DomainName}"
+        NODE_OPTIONS: --enable-source-maps
 
 Resources:
   #
   # APIGateway
   #
-
-  #
-  # Lambda Layer
-  #
+  CookbookHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+      CorsConfiguration:
+        AllowOrigins:
+          - "https://cookbook.tylerbartschi.com"
+          - "http://localhost:5173"
+        AllowMethods:
+          - GET
+          - POST
+          - PATCH
+          - OPTIONS
+        AllowHeaders:
+          - content-type
+          - authorization
+        MaxAge: 600
 
 
   #
   # Lambdas
   #
 
+  # Auth endpoints
+
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/auth/LoginHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookLongTermAuth
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+      Events:
+        LoginRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /auth/login
+            Method: POST
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/auth/LoginHandler.ts
+  
+  LogoutFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/auth/LogoutHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookLongTermAuth
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+      Events:
+        LogoutRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /auth/logout
+            Method: POST
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/auth/LogoutHandler.ts
+
+  RegisterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/auth/RegisterHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookLongTermAuth
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:TransactWriteItems
+              Resource: !GetAtt cookbookUsers.Arn
+        - S3CrudPolicy:
+            BucketName: !Ref profilePicturesBucket
+      Events:
+        RegisterRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /auth/register
+            Method: POST
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/auth/RegisterHandler.ts
+    
+  SessionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/auth/SessionHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookLongTermAuth
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+      Events:
+        SessionRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /auth/session
+            Method: GET
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/auth/SessionHandler.ts
+
+  UpdatePasswordFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/auth/UpdatePasswordHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookLongTermAuth
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+      Events:
+        UpdatePasswordRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /auth/update-password
+            Method: POST
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/auth/UpdatePasswordHandler.ts
+  
+  # User endpoints
+
+  GetPublicUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/user/GetPublicUserHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+      Events:
+        GetPublicUserRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /user/{type}/{id}
+            Method: GET
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/user/GetPublicUserHandler.ts
+
+  GetUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/user/GetUserHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+      Events:
+        GetUserRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /user/me
+            Method: GET
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/user/GetUserHandler.ts
+
+  UpdateEmailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/user/UpdateEmailHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:TransactWriteItems
+              Resource: !GetAtt cookbookUsers.Arn
+      Events:
+        UpdateEmailRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /user/me/email
+            Method: PATCH
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/user/UpdateEmailHandler.ts
+  
+  UpdateProfilePictureFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/user/UpdateProfilePictureHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+        - S3CrudPolicy:
+            BucketName: !Ref profilePicturesBucket
+      Events:
+        UpdateProfilePictureRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /user/me/profile-picture
+            Method: PATCH
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/user/UpdateProfilePictureHandler.ts
+
+  UpdateUsernameFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/user/UpdateUsernameHandler.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookUsers
+        - DynamoDBCrudPolicy:
+            TableName: !Ref cookbookShortTermAuth
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:TransactWriteItems
+              Resource: !GetAtt cookbookUsers.Arn
+      Events:
+        UpdateUsernameRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CookbookHttpApi
+            Path: /user/me/username
+            Method: PATCH
+            PayloadFormatVersion: "2.0"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+          - .js=.mjs
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/user/UpdateUsernameHandler.ts
 
   #
   # S3 Buckets
   #
-  # TODO: If profile pictures should be readable through direct S3 object URLs,
-  # this bucket needs Block Public Access settings that allow public policies,
-  # plus a bucket policy statement allowing s3:GetObject under profile-pictures/*.
   profilePicturesBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -134,18 +465,13 @@ Resources:
             Resource: !Sub "${profilePicturesBucket.Arn}/*"
             Condition:
               StringEquals:
-                AWS::SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${profilePicturesDistribution}"
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${profilePicturesDistribution}"
 
   #
   # DynamoDB Tables
   #
-
-  # TABLES ARE NOT CURRENT WITH THE SCHEMA...THEY NEED TO BE UPDATED FULLY
-
   cookbookUsers:
     Type: AWS::DynamoDB::Table
-    # TODO: Align this table's key schema with UserRow before deployment:
-    # the partition key needs to switch from "username" to "pk".
     Properties:
       TableName: cookbook_users
 
@@ -155,30 +481,15 @@ Resources:
         MaxWriteRequestUnits: !Ref MaxWCUs
 
       AttributeDefinitions:
-        - AttributeName: username
-          AttributeType: S
-        - AttributeName: email
+        - AttributeName: pk
           AttributeType: S
       KeySchema:
-        - AttributeName: username
+        - AttributeName: pk
           KeyType: HASH
-      
-      GlobalSecondaryIndexes:
-        - IndexName: cookbook_users_index
-          KeySchema:
-            - AttributeName: email
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-          OnDemandThroughput:
-            MaxReadRequestUnits: !Ref MaxRCUs
-            MaxWriteRequestUnits: !Ref MaxWCUs
+    
 
   cookbookLongTermAuth:
     Type: AWS::DynamoDB::Table
-    # TODO: Align this table's GSI schema with AuthTokenRow before deployment:
-    # replace the "username" GSI partition key with "user_id", and change
-    # "created_at" from AttributeType N to S because it is stored as an ISO string.
     Properties:
       TableName: cookbook_long_term_auth
 
@@ -190,10 +501,10 @@ Resources:
       AttributeDefinitions:
         - AttributeName: token_id
           AttributeType: S
-        - AttributeName: username
+        - AttributeName: user_id
           AttributeType: S
         - AttributeName: created_at
-          AttributeType: N
+          AttributeType: S
       KeySchema:
         - AttributeName: token_id
           KeyType: HASH
@@ -205,7 +516,7 @@ Resources:
       GlobalSecondaryIndexes:
         - IndexName: cookbook_long_term_auth_index
           KeySchema:
-            - AttributeName: username
+            - AttributeName: user_id
               KeyType: HASH
             - AttributeName: created_at
               KeyType: RANGE
@@ -217,10 +528,7 @@ Resources:
 
   cookbookShortTermAuth:
     Type: AWS::DynamoDB::Table
-    # TODO: Align this table's GSI schema with AuthTokenRow before deployment:
-    # replace the "username" GSI partition key with "user_id", and change
-    # "created_at" from AttributeType N to S because it is stored as an ISO string.
-    # The short-term auth GSI should use user_id as the HASH key and created_at as the RANGE key.
+    DependsOn: cookbookLongTermAuth
     Properties:
       TableName: cookbook_short_term_auth
 
@@ -232,10 +540,10 @@ Resources:
       AttributeDefinitions:
         - AttributeName: token_id
           AttributeType: S
-        - AttributeName: username
+        - AttributeName: user_id
           AttributeType: S
         - AttributeName: created_at
-          AttributeType: N
+          AttributeType: S
       KeySchema:
         - AttributeName: token_id
           KeyType: HASH
@@ -247,7 +555,7 @@ Resources:
       GlobalSecondaryIndexes:
         - IndexName: cookbook_short_term_auth_index
           KeySchema:
-            - AttributeName: username
+            - AttributeName: user_id
               KeyType: HASH
             - AttributeName: created_at
               KeyType: RANGE
@@ -256,3 +564,10 @@ Resources:
           OnDemandThroughput:
             MaxReadRequestUnits: !Ref MaxRCUs
             MaxWriteRequestUnits: !Ref MaxWCUs
+
+Outputs:
+  ApiBaseUrl:
+    Value: !Sub "https://${CookbookHttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/prod"
+  
+  ProfilePicturesCloudFrontBaseUrl:
+    Value: !Sub "https://${profilePicturesDistribution.DomainName}"
