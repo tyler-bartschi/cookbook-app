@@ -1,0 +1,76 @@
+name: Deploy Backend Server
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/server/**"
+      - "packages/shared/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig*.json"
+      - "jest.config.cjs"
+      - "jest.project.cjs"
+      - "eslint.config.*"
+      - ".github/workflows/deploy_backend.yaml"
+    workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: packages/server
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        working-directory: .
+        run: npm ci
+
+      - name: Build shared
+        working-directory: .
+        run: npm run build -w @cookbook/shared
+
+      - name: Type-check server
+        working-directory: .
+        run: npm run typecheck -w @cookbook/server
+
+      - name: Test server
+        working-directory: .
+        run: npm run test -w @cookbook/server
+
+      - uses: aws-actions/setup-sam@v2
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_BACKEND_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Validate SAM template
+        run: sam validate --template-file template.yaml --lint
+
+      - name: Build SAM
+        run: sam build --config-file samconfig.toml --template-file template.yaml
+
+      - name: Deploy SAM
+        run: |
+          sam deploy \
+            --config-file samconfig.toml \
+            --config-env default \
+            --template-file .aws-sam/build/template.yaml \
+            --role-arn ${{ secrets.AWS_BACKEND_CLOUDFORMATION_ROLE_ARN }} \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset
