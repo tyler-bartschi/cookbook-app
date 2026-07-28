@@ -71,6 +71,10 @@ jobs:
             --config-file samconfig.toml \
             --config-env default \
             --template-file .aws-sam/build/template.yaml \
+            --stack-name cookbook-backend \
+            --region us-east-1 \
+            --capabilities CAPABILITY_IAM \
             --role-arn ${{ secrets.AWS_BACKEND_CLOUDFORMATION_ROLE_ARN }} \
+            --resolve-s3 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
