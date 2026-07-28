@@ -16,6 +16,7 @@ import {
   UpdatePasswordRequest,
   UpdateProfilePictureRequest,
   UpdateUsernameRequest,
+  UpdatePasswordResponse,
   UserDto,
   UsernameLoginRequest,
 } from "@cookbook/shared";
@@ -30,7 +31,6 @@ import { User } from "../model/entity/User.js";
 import { createHash } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
-import { UpdatePasswordResponse } from "../../../shared/dist/models/network/responses/auth/UpdatePasswordResponse.js";
 import { AuthTokenType } from "../model/entity/AuthToken.js";
 
 export class UserService {
@@ -76,6 +76,8 @@ export class UserService {
       );
     }
 
+    const userId: string = uuidv4();
+
     let profilePictureUrl: string = "";
     try {
       if ((request as RegisterRequestWithImage).imageBytesAsBase64String) {
@@ -83,6 +85,7 @@ export class UserService {
         const filename: string = createHash("sha256").update(imageBytes).digest("hex");
 
         profilePictureUrl = await this._imageStorage.uploadProfilePicture(
+          userId,
           filename,
           imageBytes,
           (request as RegisterRequestWithImage).imageFileExtension,
@@ -94,7 +97,6 @@ export class UserService {
       profilePictureUrl = "";
     }
 
-    const userId: string = uuidv4();
     const hashedPassword: string = await bcrypt.hash(request.password, this.saltRounds);
 
     const now = new Date(Date.now());
@@ -257,6 +259,7 @@ export class UserService {
       .update(updateRequest.imageBytesAsBase64String)
       .digest("hex");
     const newProfilePictureUrl = await this._imageStorage.uploadProfilePicture(
+      user.userId,
       filename,
       updateRequest.imageBytesAsBase64String,
       updateRequest.imageFileExtension,
@@ -264,13 +267,13 @@ export class UserService {
 
     if (user.profilePictureUrl) {
       try {
-        await this._imageStorage.deleteProfilePicture(user.profilePictureUrl);
+        await this._imageStorage.deleteProfilePicture(user.profilePictureUrl, user.userId);
       } catch (error: unknown) {
         // An error occurred trying to delete the old image, delete the new one and throw
         console.error("An error occurred attempting to delete a profile picture:", error);
 
         try {
-          await this._imageStorage.deleteProfilePicture(newProfilePictureUrl);
+          await this._imageStorage.deleteProfilePicture(newProfilePictureUrl, user.userId);
         } catch (error: unknown) {
           console.error("Rollback deletion of new profile picture failed:", error);
         }
@@ -333,7 +336,10 @@ export class UserService {
 
     const exists: User | null = await getOperation(request.newField);
     if (exists && exists[field as "email" | "username"] === request.newField) {
-      throw new UserServiceError(`${request.newField} is already your current ${field}`, HTTP_CODES.get("bad-request"));
+      throw new UserServiceError(
+        `${request.newField} is already your current ${field}`,
+        HTTP_CODES.get("bad-request"),
+      );
     }
     if (exists) {
       throw new UserServiceError(`That ${field} is already in use`, HTTP_CODES.get("conflict"));

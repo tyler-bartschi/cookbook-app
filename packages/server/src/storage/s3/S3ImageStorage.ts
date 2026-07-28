@@ -7,24 +7,27 @@ import { ObjectDeleteError } from "../../model/errors/error-code/ObjectDeleteErr
 export class S3ImageStorage implements ImageStorage {
   private readonly _bucketName: string = serverConfig.profilePictures.bucketName;
   private readonly _bucketRegion: string = serverConfig.profilePictures.bucketRegion;
+  private readonly _cloudfrontUrl: string = serverConfig.profilePictures.cloudfrontUrl.replace(/\/+$/, "");
 
   private readonly _client = new S3Client({ region: this._bucketRegion });
 
   public async uploadProfilePicture(
+    userId: string,
     filename: string,
     imageBytesAsBase64String: string,
     imageFileExtension: string,
   ): Promise<string> {
+    const key: string = `profile-pictures/${userId}/${filename}.${imageFileExtension}`;
     const params = {
       Bucket: this._bucketName,
-      Key: `profile-pictures/${filename}.${imageFileExtension}`,
+      Key: key,
       Body: Buffer.from(imageBytesAsBase64String, "base64"),
       ContentType: `image/${imageFileExtension}`,
     };
 
     try {
       await this._client.send(new PutObjectCommand(params));
-      return `https://${this._bucketName}.s3.${this._bucketRegion}.amazonaws.com/profile-pictures/${filename}.${imageFileExtension}`;
+      return `${this._cloudfrontUrl}/${key}`;
     } catch (error: unknown) {
       const message: string = error instanceof Error ? error.message : String(error);
       console.error(
@@ -35,10 +38,20 @@ export class S3ImageStorage implements ImageStorage {
     }
   }
 
-  public async deleteProfilePicture(filename: string): Promise<void> {
-    const params = { Bucket: this._bucketName, Key: `profile-pictures/${filename}` };
-
+  public async deleteProfilePicture(path: string, userId?: string): Promise<void> {
     try {
+      const key: string = new URL(path).pathname.replace(/^\/+/, "");
+
+      if (!key || !key.startsWith("profile-pictures/")) {
+        throw new ObjectDeleteError("Invalid profile picture key");
+      }
+
+      if (userId && !key.startsWith(`profile-pictures/${userId}/`)) {
+        throw new ObjectDeleteError("Profile picture does not belong to this user");
+      }
+
+      const params = { Bucket: this._bucketName, Key: key };
+
       await this._client.send(new DeleteObjectCommand(params));
     } catch (error: unknown) {
       const message: string = error instanceof Error ? error.message : String(error);

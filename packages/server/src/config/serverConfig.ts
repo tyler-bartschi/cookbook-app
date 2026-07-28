@@ -22,6 +22,7 @@ export const serverConfig = {
   },
   profilePictures: {
     bucketName: env.PROFILE_PICTURE_S3_BUCKET_NAME,
-    bucketRegion: "us-east-1",
+    bucketRegion: env.AWS_REGION,
+    cloudfrontUrl: env.PROFILE_PICTURE_CLOUDFRONT_BASE_URL,
   },
 } as const;

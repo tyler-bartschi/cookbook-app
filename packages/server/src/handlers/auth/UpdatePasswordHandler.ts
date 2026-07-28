@@ -1,5 +1,5 @@
 /**
- * Endpoint: /auth/change-password
+ * Endpoint: /auth/update-password
  */
 
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
@@ -11,7 +11,7 @@ import {
   validateAuthorizationExists,
 } from "../../utils/ValidateAuthorizationExists.js";
 import { HttpResponseBuilder } from "../../utils/HttpResponseBuilder.js";
-import { UpdatePasswordResponse } from "../../../../shared/dist/models/network/responses/auth/UpdatePasswordResponse.js";
+import { UpdatePasswordResponse } from "@cookbook/shared";
 
 const { userService } = initServices();
 

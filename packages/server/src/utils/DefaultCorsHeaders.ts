@@ -1,7 +1,5 @@
-export const DEFAULT_CORS_HEADERS = {
-  "access-control-allow-origin": "https://cookbook.tylerbartschi.com",
-  "access-control-allow-headers": "content-type,authorization",
-};
+// empty because it is leftover, API Gateway now handles CORS headers
+export const DEFAULT_CORS_HEADERS = {};
 
 export const APPLICATION_JSON_HEADER = {
   "content-type": "application/json",

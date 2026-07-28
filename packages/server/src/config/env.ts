@@ -11,7 +11,8 @@ const envSchema = z.object({
   SHORT_TERM_AUTH_DB_NAME: z.string().min(1).default("cookbook_short_term_auth"),
   SHORT_TERM_AUTH_DB_INDEX_NAME: z.string().min(1).default("cookbook_short_term_auth_index"),
 
-  PROFILE_PICTURE_S3_BUCKET_NAME: z.string().min(1).default("cookbook_profile_pictures_bartschi"),
+  PROFILE_PICTURE_S3_BUCKET_NAME: z.string().min(1).default("cookbook-profile-pictures-bartschi"),
+  PROFILE_PICTURE_CLOUDFRONT_BASE_URL: z.url(),
 });
 
 export const env = envSchema.parse(process.env);

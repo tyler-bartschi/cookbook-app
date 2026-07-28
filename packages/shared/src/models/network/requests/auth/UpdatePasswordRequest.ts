@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 /**
- * Endpoint: /auth/change-password
+ * Endpoint: /auth/update-password
  *
  * Sends the password and the new password to update
  */
