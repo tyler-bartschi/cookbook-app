@@ -14,7 +14,7 @@ on:
       - "jest.project.cjs"
       - "eslint.config.*"
       - ".github/workflows/deploy_backend.yaml"
-    workflow_dispatch:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -63,7 +63,7 @@ jobs:
         run: sam validate --template-file template.yaml --lint
 
       - name: Build SAM
-        run: sam build --config-file samconfig.toml --template-file template.yaml
+        run: sam build --config-file samconfig.toml --template-file template.yaml --build-in-source
 
       - name: Deploy SAM
         run: |
