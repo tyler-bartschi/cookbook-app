@@ -1,0 +1,10 @@
+/**
+ * Public entry point for the Cookbook design tokens.
+ *
+ * Import this file once from the application's global stylesheet when the token
+ * system is ready to be used.
+ */
+
+@import "./primitives.css";
+@import "./semantic.css";
+@import "./components.css";

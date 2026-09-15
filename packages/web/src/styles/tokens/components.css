@@ -1,0 +1,102 @@
+/**
+ * Cookbook design tokens: component roles
+ *
+ * Variable contracts for common components. These do not style or create any
+ * classes; they provide consistent values for future component CSS.
+ */
+
+:root {
+  /* Shared button shape, type, spacing, and disabled treatment. */
+  --cb-button-height-sm: var(--cb-size-control-sm);
+  --cb-button-height-md: var(--cb-size-control-md);
+  --cb-button-height-lg: var(--cb-size-control-lg);
+  --cb-button-padding-inline-sm: var(--cb-space-3);
+  --cb-button-padding-inline-md: var(--cb-space-4);
+  --cb-button-padding-inline-lg: var(--cb-space-6);
+  --cb-button-gap: var(--cb-space-2);
+  --cb-button-border-width: var(--cb-border-width-thin);
+  --cb-button-radius: var(--cb-radius-md);
+  --cb-button-font-size: var(--cb-font-size-sm);
+  --cb-button-font-weight: var(--cb-font-weight-bold);
+  --cb-button-disabled-opacity: var(--cb-opacity-50);
+
+  /* Primary: the main action on a page or in a form. */
+  --cb-button-primary-background: var(--cb-color-brand-600);
+  --cb-button-primary-background-hover: var(--cb-color-brand-700);
+  --cb-button-primary-background-active: var(--cb-color-brand-800);
+  --cb-button-primary-content: var(--cb-color-neutral-0);
+  --cb-button-primary-border: var(--cb-color-brand-600);
+  --cb-button-primary-border-hover: var(--cb-color-brand-700);
+
+  /* Neutral: ordinary actions without positive or destructive meaning. */
+  --cb-button-neutral-background: var(--cb-color-neutral-800);
+  --cb-button-neutral-background-hover: var(--cb-color-neutral-900);
+  --cb-button-neutral-background-active: var(--cb-color-neutral-950);
+  --cb-button-neutral-content: var(--cb-color-neutral-0);
+  --cb-button-neutral-border: var(--cb-color-neutral-800);
+  --cb-button-neutral-border-hover: var(--cb-color-neutral-900);
+
+  /* Positive: save, confirm, approve, add, or finish successfully. */
+  --cb-button-positive-background: var(--cb-color-green-600);
+  --cb-button-positive-background-hover: var(--cb-color-green-700);
+  --cb-button-positive-background-active: var(--cb-color-green-900);
+  --cb-button-positive-content: var(--cb-color-neutral-0);
+  --cb-button-positive-border: var(--cb-color-green-600);
+  --cb-button-positive-border-hover: var(--cb-color-green-700);
+
+  /* Warning: proceed carefully when the action is not destructive. */
+  --cb-button-warning-background: var(--cb-color-amber-500);
+  --cb-button-warning-background-hover: var(--cb-color-amber-600);
+  --cb-button-warning-background-active: var(--cb-color-amber-700);
+  --cb-button-warning-content: var(--cb-color-neutral-950);
+  --cb-button-warning-border: var(--cb-color-amber-500);
+  --cb-button-warning-border-hover: var(--cb-color-amber-600);
+
+  /* Danger: delete, remove, disconnect, or another destructive action. */
+  --cb-button-danger-background: var(--cb-color-red-600);
+  --cb-button-danger-background-hover: var(--cb-color-red-700);
+  --cb-button-danger-background-active: var(--cb-color-red-900);
+  --cb-button-danger-content: var(--cb-color-neutral-0);
+  --cb-button-danger-border: var(--cb-color-red-600);
+  --cb-button-danger-border-hover: var(--cb-color-red-700);
+
+  /* Secondary/outlined variation; pair its intent color with a pale surface. */
+  --cb-button-secondary-background: transparent;
+  --cb-button-secondary-background-hover: var(--cb-color-brand-50);
+  --cb-button-secondary-background-active: var(--cb-color-brand-100);
+  --cb-button-secondary-content: var(--cb-color-brand-700);
+  --cb-button-secondary-border: var(--cb-color-brand-600);
+  --cb-button-secondary-border-hover: var(--cb-color-brand-700);
+
+  /* Ghost variation for low-emphasis actions. */
+  --cb-button-ghost-background: transparent;
+  --cb-button-ghost-background-hover: var(--cb-color-neutral-200);
+  --cb-button-ghost-background-active: var(--cb-color-neutral-300);
+  --cb-button-ghost-content: var(--cb-content-primary);
+  --cb-button-ghost-border: transparent;
+  --cb-button-ghost-border-hover: transparent;
+
+  /* Form controls */
+  --cb-input-height: var(--cb-size-control-md);
+  --cb-input-background: var(--cb-background-surface-raised);
+  --cb-input-content: var(--cb-content-primary);
+  --cb-input-placeholder: var(--cb-content-tertiary);
+  --cb-input-border: var(--cb-border-default);
+  --cb-input-border-hover: var(--cb-border-strong);
+  --cb-input-border-focus: var(--cb-border-focus);
+  --cb-input-border-danger: var(--cb-color-red-600);
+  --cb-input-radius: var(--cb-radius-md);
+  --cb-input-padding-inline: var(--cb-space-3);
+
+  /* Cards, panels, and badges */
+  --cb-card-background: var(--cb-background-surface);
+  --cb-card-border: var(--cb-border-default);
+  --cb-card-radius: var(--cb-radius-lg);
+  --cb-card-shadow: var(--cb-shadow-sm);
+  --cb-card-padding: var(--cb-space-6);
+
+  --cb-badge-background: var(--cb-color-brand-100);
+  --cb-badge-content: var(--cb-color-brand-900);
+  --cb-badge-border: var(--cb-color-brand-200);
+  --cb-badge-radius: var(--cb-radius-pill);
+}

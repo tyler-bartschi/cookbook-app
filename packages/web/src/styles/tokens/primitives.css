@@ -1,0 +1,171 @@
+/**
+ * Cookbook design tokens: primitives
+ *
+ * Raw values used to build the semantic and component token layers. Application
+ * styles should prefer the aliases in semantic.css and components.css.
+ */
+
+:root {
+  /* Brand: blue-teal, expanded from the portfolio's #087f78 accent. */
+  --cb-color-brand-50: #eefbfb;
+  --cb-color-brand-100: #d5f4f3;
+  --cb-color-brand-200: #afe8e6;
+  --cb-color-brand-300: #7bd6d3;
+  --cb-color-brand-400: #45bab8;
+  --cb-color-brand-500: #239c9b;
+  --cb-color-brand-600: #087f78;
+  --cb-color-brand-700: #0b6763;
+  --cb-color-brand-800: #10524f;
+  --cb-color-brand-900: #123f3d;
+  --cb-color-brand-950: #082625;
+
+  /* Neutral: cool, slightly blue grays that complement the brand. */
+  --cb-color-neutral-0: #ffffff;
+  --cb-color-neutral-50: #faf8f2;
+  --cb-color-neutral-100: #f4f1e9;
+  --cb-color-neutral-200: #e6e4dd;
+  --cb-color-neutral-300: #cbd1ca;
+  --cb-color-neutral-400: #9fabae;
+  --cb-color-neutral-500: #718087;
+  --cb-color-neutral-600: #52616a;
+  --cb-color-neutral-700: #34434c;
+  --cb-color-neutral-800: #17242c;
+  --cb-color-neutral-900: #101c24;
+  --cb-color-neutral-950: #091116;
+
+  /* Supporting intent colors. These communicate meaning, not branding. */
+  --cb-color-green-50: #effbf3;
+  --cb-color-green-100: #d9f5e2;
+  --cb-color-green-200: #b5eac6;
+  --cb-color-green-500: #228c4f;
+  --cb-color-green-600: #14753e;
+  --cb-color-green-700: #105d33;
+  --cb-color-green-900: #153f28;
+
+  --cb-color-amber-50: #fff9e8;
+  --cb-color-amber-100: #fceec5;
+  --cb-color-amber-200: #f6d982;
+  --cb-color-amber-500: #b77608;
+  --cb-color-amber-600: #925b05;
+  --cb-color-amber-700: #744504;
+  --cb-color-amber-900: #4c3210;
+
+  --cb-color-red-50: #fff2f1;
+  --cb-color-red-100: #ffe1de;
+  --cb-color-red-200: #ffc7c2;
+  --cb-color-red-500: #c83c35;
+  --cb-color-red-600: #aa2924;
+  --cb-color-red-700: #8c211e;
+  --cb-color-red-900: #551c1a;
+
+  /* Opacity */
+  --cb-opacity-0: 0;
+  --cb-opacity-5: 0.05;
+  --cb-opacity-10: 0.1;
+  --cb-opacity-20: 0.2;
+  --cb-opacity-30: 0.3;
+  --cb-opacity-40: 0.4;
+  --cb-opacity-50: 0.5;
+  --cb-opacity-60: 0.6;
+  --cb-opacity-70: 0.7;
+  --cb-opacity-80: 0.8;
+  --cb-opacity-90: 0.9;
+  --cb-opacity-100: 1;
+
+  /* Spacing: 4px base unit */
+  --cb-space-0: 0;
+  --cb-space-1: 0.25rem;
+  --cb-space-2: 0.5rem;
+  --cb-space-3: 0.75rem;
+  --cb-space-4: 1rem;
+  --cb-space-5: 1.25rem;
+  --cb-space-6: 1.5rem;
+  --cb-space-8: 2rem;
+  --cb-space-10: 2.5rem;
+  --cb-space-12: 3rem;
+  --cb-space-16: 4rem;
+  --cb-space-20: 5rem;
+  --cb-space-24: 6rem;
+
+  /* Borders */
+  --cb-border-width-0: 0;
+  --cb-border-width-thin: 1px;
+  --cb-border-width-medium: 2px;
+  --cb-border-width-thick: 4px;
+
+  --cb-radius-none: 0;
+  --cb-radius-xs: 0.125rem;
+  --cb-radius-sm: 0.25rem;
+  --cb-radius-md: 0.5rem;
+  --cb-radius-lg: 0.75rem;
+  --cb-radius-xl: 1rem;
+  --cb-radius-2xl: 1.5rem;
+  --cb-radius-round: 50%;
+  --cb-radius-pill: 9999px;
+
+  /* Typography */
+  --cb-font-family-sans: "Manrope", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --cb-font-family-mono: "DM Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --cb-font-size-xs: 0.75rem;
+  --cb-font-size-sm: 0.875rem;
+  --cb-font-size-md: 1rem;
+  --cb-font-size-lg: 1.125rem;
+  --cb-font-size-xl: 1.25rem;
+  --cb-font-size-2xl: 1.5rem;
+  --cb-font-size-3xl: 1.875rem;
+  --cb-font-size-4xl: 2.25rem;
+  --cb-font-size-5xl: 3rem;
+
+  --cb-font-weight-regular: 400;
+  --cb-font-weight-medium: 500;
+  --cb-font-weight-semibold: 600;
+  --cb-font-weight-bold: 700;
+
+  --cb-font-style-normal: normal;
+  --cb-font-style-italic: italic;
+
+  --cb-line-height-tight: 1.15;
+  --cb-line-height-snug: 1.35;
+  --cb-line-height-normal: 1.5;
+  --cb-line-height-relaxed: 1.7;
+
+  --cb-letter-spacing-tight: -0.025em;
+  --cb-letter-spacing-normal: 0;
+  --cb-letter-spacing-wide: 0.04em;
+  --cb-letter-spacing-wider: 0.1em;
+
+  /* Common control, icon, and layout sizes */
+  --cb-size-control-sm: 2rem;
+  --cb-size-control-md: 2.5rem;
+  --cb-size-control-lg: 3rem;
+  --cb-size-icon-sm: 1rem;
+  --cb-size-icon-md: 1.25rem;
+  --cb-size-icon-lg: 1.5rem;
+  --cb-size-content-sm: 40rem;
+  --cb-size-content-md: 64rem;
+  --cb-size-content-lg: 77.5rem;
+
+  /* Elevation */
+  --cb-shadow-none: none;
+  --cb-shadow-sm: 0 1px 2px rgb(16 28 36 / 8%);
+  --cb-shadow-md: 0 4px 12px rgb(16 28 36 / 12%);
+  --cb-shadow-lg: 0 12px 28px rgb(16 28 36 / 16%);
+  --cb-shadow-focus: 0 0 0 3px rgb(35 156 155 / 28%);
+
+  /* Motion */
+  --cb-duration-instant: 0ms;
+  --cb-duration-fast: 120ms;
+  --cb-duration-normal: 180ms;
+  --cb-duration-slow: 280ms;
+  --cb-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --cb-ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Layering */
+  --cb-z-base: 0;
+  --cb-z-raised: 10;
+  --cb-z-dropdown: 100;
+  --cb-z-sticky: 200;
+  --cb-z-modal: 300;
+  --cb-z-toast: 400;
+}

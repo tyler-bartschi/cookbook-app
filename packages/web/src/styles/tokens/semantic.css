@@ -1,0 +1,86 @@
+/**
+ * Cookbook design tokens: semantic aliases
+ *
+ * These names describe purpose rather than a specific value. Prefer them in
+ * application CSS so the visual theme can evolve without changing components.
+ */
+
+:root {
+  /* Surfaces */
+  --cb-background-canvas: var(--cb-color-neutral-100);
+  --cb-background-surface: var(--cb-color-neutral-50);
+  --cb-background-surface-raised: var(--cb-color-neutral-0);
+  --cb-background-surface-muted: var(--cb-color-neutral-200);
+  --cb-background-inverse: var(--cb-color-neutral-900);
+  --cb-background-brand: var(--cb-color-brand-600);
+  --cb-background-disabled: var(--cb-color-neutral-200);
+
+  /* Content */
+  --cb-content-primary: var(--cb-color-neutral-800);
+  --cb-content-secondary: var(--cb-color-neutral-600);
+  --cb-content-tertiary: var(--cb-color-neutral-500);
+  --cb-content-inverse: var(--cb-color-neutral-50);
+  --cb-content-brand: var(--cb-color-brand-600);
+  --cb-content-link: var(--cb-color-brand-700);
+  --cb-content-link-hover: var(--cb-color-brand-900);
+  --cb-content-disabled: var(--cb-color-neutral-400);
+
+  /* Borders and dividers */
+  --cb-border-subtle: var(--cb-color-neutral-200);
+  --cb-border-default: var(--cb-color-neutral-300);
+  --cb-border-strong: var(--cb-color-neutral-500);
+  --cb-border-inverse: rgb(255 255 255 / 30%);
+  --cb-border-brand: var(--cb-color-brand-600);
+  --cb-border-focus: var(--cb-color-brand-500);
+  --cb-border-disabled: var(--cb-color-neutral-300);
+
+  /* Informational and validation feedback */
+  --cb-status-info-background: var(--cb-color-brand-50);
+  --cb-status-info-content: var(--cb-color-brand-900);
+  --cb-status-info-border: var(--cb-color-brand-200);
+
+  --cb-status-success-background: var(--cb-color-green-50);
+  --cb-status-success-content: var(--cb-color-green-900);
+  --cb-status-success-border: var(--cb-color-green-200);
+
+  --cb-status-warning-background: var(--cb-color-amber-50);
+  --cb-status-warning-content: var(--cb-color-amber-900);
+  --cb-status-warning-border: var(--cb-color-amber-200);
+
+  --cb-status-danger-background: var(--cb-color-red-50);
+  --cb-status-danger-content: var(--cb-color-red-900);
+  --cb-status-danger-border: var(--cb-color-red-200);
+
+  /* Interaction and selection */
+  --cb-focus-ring-color: rgb(35 156 155 / 28%);
+  --cb-selection-background: var(--cb-color-brand-200);
+  --cb-selection-content: var(--cb-color-neutral-900);
+  --cb-overlay-scrim: rgb(9 17 22 / 60%);
+  --cb-overlay-light: rgb(255 255 255 / 70%);
+
+  /* Readable text roles */
+  --cb-text-body-size: var(--cb-font-size-md);
+  --cb-text-body-weight: var(--cb-font-weight-regular);
+  --cb-text-body-style: var(--cb-font-style-normal);
+  --cb-text-body-line-height: var(--cb-line-height-normal);
+
+  --cb-text-label-size: var(--cb-font-size-sm);
+  --cb-text-label-weight: var(--cb-font-weight-semibold);
+  --cb-text-label-style: var(--cb-font-style-normal);
+  --cb-text-label-line-height: var(--cb-line-height-snug);
+
+  --cb-text-caption-size: var(--cb-font-size-xs);
+  --cb-text-caption-weight: var(--cb-font-weight-regular);
+  --cb-text-caption-style: var(--cb-font-style-normal);
+  --cb-text-caption-line-height: var(--cb-line-height-snug);
+
+  --cb-text-heading-weight: var(--cb-font-weight-semibold);
+  --cb-text-heading-style: var(--cb-font-style-normal);
+  --cb-text-heading-line-height: var(--cb-line-height-tight);
+  --cb-text-heading-letter-spacing: var(--cb-letter-spacing-tight);
+
+  --cb-text-emphasis-weight: var(--cb-font-weight-bold);
+  --cb-text-emphasis-style: var(--cb-font-style-normal);
+  --cb-text-quote-weight: var(--cb-font-weight-regular);
+  --cb-text-quote-style: var(--cb-font-style-italic);
+}
