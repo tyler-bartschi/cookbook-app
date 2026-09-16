@@ -1,0 +1,93 @@
+.profile-info-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: var(--cb-space-2);
+}
+
+.profile-info-wrapper a {
+  margin-inline-end: var(--cb-space-4);
+}
+
+.profile-panel-toggle {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: var(--cb-space-2);
+  cursor: pointer;
+}
+
+.profile-image {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--cb-radius-round);
+  object-fit: cover;
+}
+
+.login-button {
+  font-size: var(--cb-font-size-xl);
+  font-weight: var(--cb-font-weight-semibold);
+  color: var(--cb-content-inverse);
+  text-decoration: none;
+}
+
+.login-button:hover {
+  color: var(--cb-color-neutral-300);
+}
+
+.profile-info-chevron {
+  color: var(--cb-content-inverse);
+  transition: transform var(--cb-duration-normal) var(--cb-ease-standard);
+}
+
+.profile-info-chevron:hover {
+  color: var(--cb-color-neutral-300);
+}
+
+.profile-info-chevron--open {
+  transform: rotate(180deg);
+}
+
+.profile-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-space-2);
+  background-color: var(--cb-card-background);
+  border: var(--cb-border-width-thin) solid var(--cb-card-border);
+  border-radius: var(--cb-card-radius);
+  box-shadow: var(--cb-card-shadow);
+  padding: var(--cb-space-4);
+  width: 8rem;
+  align-items: flex-start;
+  text-align: left;
+
+  opacity: 0;
+  transform: translateY(-0.5rem);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--cb-duration-normal) var(--cb-ease-standard),
+    transform var(--cb-duration-normal) var(--cb-ease-standard),
+    visibility 0s linear var(--cb-duration-normal);
+}
+
+.profile-panel--open {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+
+  transition:
+    opacity var(--cb-duration-normal) var(--cb-ease-standard),
+    transform var(--cb-duration-normal) var(--cb-ease-standard),
+    visibility 0s;
+}
+
+.profile-panel-link {
+  text-decoration: none;
+}
