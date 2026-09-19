@@ -10,6 +10,10 @@ const ProfileInfo = () => {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLDivElement | null>(null);
 
+  const closePanel = () => {
+    setPanelOpen(false);
+  };
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (!(e.target instanceof Node)) return;
@@ -68,10 +72,10 @@ const ProfileInfo = () => {
           ref={panelRef}
           className={panelOpen ? "profile-panel profile-panel--open" : "profile-panel"}
         >
-          <NavLink className="profile-panel-link" to="/login">
+          <NavLink className="profile-panel-link" to="/login" onClick={closePanel}>
             Login
           </NavLink>
-          <NavLink className="profile-panel-link" to="/register">
+          <NavLink className="profile-panel-link" to="/register" onClick={closePanel}>
             Register
           </NavLink>
         </div>
