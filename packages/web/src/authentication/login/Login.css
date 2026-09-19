@@ -1,0 +1,10 @@
+.login-page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* padding: var(--cb-space-4); */
+}
+
+.login-header {
+
+}

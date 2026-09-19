@@ -1,0 +1,11 @@
+import "./css/Home.css";
+
+const Home = () => {
+  return (
+    <>
+      <div>Home Page placeholder</div>
+    </>
+  );
+};
+
+export default Home;

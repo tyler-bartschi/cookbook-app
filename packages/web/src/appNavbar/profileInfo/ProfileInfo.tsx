@@ -35,7 +35,7 @@ const ProfileInfo = () => {
         <div>Logged In placeholder</div>
       ) : (
         <div className="profile-info-wrapper">
-          <NavLink to="/" className="login-button">
+          <NavLink to="/login" className="login-button">
             {/* add a route for this (in App) then navigate to that route */}
             Login
           </NavLink>
@@ -68,10 +68,10 @@ const ProfileInfo = () => {
           ref={panelRef}
           className={panelOpen ? "profile-panel profile-panel--open" : "profile-panel"}
         >
-          <NavLink className="profile-panel-link" to="/">
+          <NavLink className="profile-panel-link" to="/login">
             Login
           </NavLink>
-          <NavLink className="profile-panel-link" to="/">
+          <NavLink className="profile-panel-link" to="/register">
             Register
           </NavLink>
         </div>
