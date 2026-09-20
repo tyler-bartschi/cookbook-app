@@ -3,8 +3,13 @@ import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import "./Login.css";
 import AuthenticationFields from "../AuthenticationFields";
 import { Link } from "react-router-dom";
+import { LoginPresenter, LoginView } from "../../presenter/authentication/LoginPresenter";
 
-const Login = () => {
+interface Props {
+  previousUrl?: string;
+}
+
+const Login = (props: Props) => {
   const [userIdentifier, setUserIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -12,8 +17,16 @@ const Login = () => {
   const [usernameOrEmailError, setUsernameOrEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  const listener: LoginView = {
+    setIsLoading,
+    setUsernameOrEmailError,
+    setPasswordError,
+  };
+
+  const [presenter] = useState(() => new LoginPresenter(listener));
+
   const submitButtonDisabled = () => {
-    return !password || !userIdentifier;
+    return presenter.submitButtonStatus(userIdentifier, password);
   };
 
   const submit: SubmitEventHandler<HTMLFormElement> = async (event) => {
@@ -42,7 +55,10 @@ const Login = () => {
   const switchAuthenticationMethodFactory = () => {
     return (
       <div>
-        Not registered? <Link className="authentication-link" to="/register">Register</Link>
+        Not registered?{" "}
+        <Link className="authentication-link" to="/register">
+          Register
+        </Link>
       </div>
     );
   };
