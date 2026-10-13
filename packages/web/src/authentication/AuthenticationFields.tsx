@@ -1,3 +1,5 @@
+import FieldError from "./FieldError";
+
 interface Props {
   setUsernameOrEmail: React.Dispatch<React.SetStateAction<string>>;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
@@ -10,7 +12,6 @@ const AuthenticationFields = (props: Props) => {
     <>
       <div className="form-field">
         <label htmlFor="usernameOrEmailInput">Username or email</label>
-
         <input
           id="usernameOrEmailInput"
           name="username"
@@ -21,11 +22,7 @@ const AuthenticationFields = (props: Props) => {
           aria-describedby={props.usernameOrEmailError ? "usernameOrEmailError" : undefined}
           onChange={(event) => props.setUsernameOrEmail(event.target.value)}
         />
-        {props.usernameOrEmailError && (
-          <div id="usernameOrEmailError" className="field-error">
-            {props.usernameOrEmailError}
-          </div>
-        )}
+        <FieldError id="usernameOrEmailError" errorSource={props.usernameOrEmailError} />
       </div>
 
       <div className="form-field">
@@ -40,12 +37,7 @@ const AuthenticationFields = (props: Props) => {
           aria-describedby={props.passwordError ? "passwordError" : undefined}
           onChange={(event) => props.setPassword(event.target.value)}
         />
-
-        {props.passwordError && (
-          <div id="passwordError" className="field-error">
-            {props.passwordError}
-          </div>
-        )}
+        <FieldError id="passwordError" errorSource={props.passwordError} />
       </div>
     </>
   );
