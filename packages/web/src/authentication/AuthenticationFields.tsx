@@ -5,19 +5,22 @@ interface Props {
   setPassword: React.Dispatch<React.SetStateAction<string>>;
   usernameOrEmailError: string;
   passwordError: string;
+  usernameOrEmailLabel: string;
+  usernameOrEmailPlaceholder: string;
+  usernameOrEmailAutoCompleteType: string;
 }
 
 const AuthenticationFields = (props: Props) => {
   return (
     <>
       <div className="form-field">
-        <label htmlFor="usernameOrEmailInput">Username or email</label>
+        <label htmlFor="usernameOrEmailInput">{props.usernameOrEmailLabel}</label>
         <input
           id="usernameOrEmailInput"
-          name="username"
+          name={props.usernameOrEmailLabel}
           type="text"
-          autoComplete="username"
-          placeholder="Username or email"
+          autoComplete={props.usernameOrEmailAutoCompleteType}
+          placeholder={props.usernameOrEmailPlaceholder}
           aria-invalid={Boolean(props.usernameOrEmailError)}
           aria-describedby={props.usernameOrEmailError ? "usernameOrEmailError" : undefined}
           onChange={(event) => props.setUsernameOrEmail(event.target.value)}

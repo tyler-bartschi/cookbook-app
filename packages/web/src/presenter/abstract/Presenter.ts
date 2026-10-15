@@ -1,6 +1,8 @@
 /* eslint-disable-next-line @typescript-eslint/no-empty-object-type */
 export interface View {}
 
+export type errorFunc = (error: string) => void;
+
 export abstract class Presenter<V extends View> {
   private _view: V;
 

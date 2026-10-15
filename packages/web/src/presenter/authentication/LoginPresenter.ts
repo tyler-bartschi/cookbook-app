@@ -1,9 +1,9 @@
-import { Presenter, View } from "../abstract/Presenter";
+import { errorFunc, Presenter, View } from "../abstract/Presenter";
 
 export interface LoginView extends View {
   setIsLoading: (value: boolean) => void;
-  setUsernameOrEmailError: (error: string) => void;
-  setPasswordError: (error: string) => void;
+  setUsernameOrEmailError: errorFunc;
+  setPasswordError: errorFunc;
 }
 
 export class LoginPresenter extends Presenter<LoginView> {

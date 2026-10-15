@@ -48,6 +48,9 @@ const Login = (props: Props) => {
         setPassword={setPassword}
         usernameOrEmailError={usernameOrEmailError}
         passwordError={passwordError}
+        usernameOrEmailLabel="Username or email"
+        usernameOrEmailPlaceholder="Username or email"
+        usernameOrEmailAutoCompleteType="username"
       />
     );
   };
