@@ -8,6 +8,7 @@ import { HttpResponseBuilder } from "../../utils/HttpResponseBuilder.js";
 import { HTTP_CODES } from "../../utils/HttpCodes.js";
 import { ErrorResponse, GetPublicUserResponse, PublicUserDto } from "@cookbook/shared";
 import { APPLICATION_JSON_HEADER } from "../../utils/DefaultCorsHeaders.js";
+import { UserLookupType } from "../../types/UserLookupType.js";
 
 const { userService } = initServices();
 
@@ -25,7 +26,21 @@ export async function handler(
     );
   }
 
-  if (!id) {
+  let trueType: UserLookupType;
+  const tempType = type.trim().toLowerCase();
+  if (tempType === UserLookupType.USERNAME) {
+    trueType = UserLookupType.USERNAME;
+  } else if (tempType === UserLookupType.USERID) {
+    trueType = UserLookupType.USERID;
+  } else {
+    return HttpResponseBuilder.buildCustomResponse(
+      HTTP_CODES.get("bad-request")!,
+      { message: "type path parameter is incorrect" } as ErrorResponse,
+      APPLICATION_JSON_HEADER,
+    );
+  }
+
+  if (!id || !id.trim()) {
     return HttpResponseBuilder.buildCustomResponse(
       HTTP_CODES.get("bad-request")!,
       { message: "id path parameter missing" } as ErrorResponse,
@@ -35,8 +50,8 @@ export async function handler(
 
   try {
     const user: PublicUserDto = await userService.getPublicUser(
-      type.trim().toLowerCase(),
-      id.trim().toLowerCase(),
+      trueType,
+      id.trim(),
     );
     return HttpResponseBuilder.successfulJsonResponse({ user: user } as GetPublicUserResponse);
   } catch (error: unknown) {

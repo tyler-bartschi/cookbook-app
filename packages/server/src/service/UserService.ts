@@ -32,6 +32,7 @@ import { createHash } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { AuthTokenType } from "../model/entity/AuthToken.js";
+import { UserLookupType } from "../types/UserLookupType.js";
 
 export class UserService {
   private readonly _userDao: UserDao;
@@ -225,14 +226,12 @@ export class UserService {
     };
   }
 
-  public async getPublicUser(type: string, id: string): Promise<PublicUserDto> {
+  public async getPublicUser(type: UserLookupType, id: string): Promise<PublicUserDto> {
     let user: User | null = null;
 
-    if (type === "username") {
+    if (type === UserLookupType.USERNAME) {
       user = await this._userDao.getUserByUsername(id);
-    } else if (type === "email") {
-      user = await this._userDao.getUserByEmail(id);
-    } else if (type === "userId") {
+    } else if (type === UserLookupType.USERID) {
       user = await this._userDao.getUserById(id);
     }
 

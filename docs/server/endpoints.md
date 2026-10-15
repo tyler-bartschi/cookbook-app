@@ -303,10 +303,10 @@ Authorization: none.
 
 Path parameters:
 
-| Parameter | Behavior                                                                 |
-| --------- | ------------------------------------------------------------------------ |
-| `type`    | Intended lookup type. Current working values are `username` and `email`. |
-| `id`      | Lookup value. The handler trims and lowercases this value.               |
+| Parameter | Behavior                                                               |
+| --------- | ---------------------------------------------------------------------- |
+| `type`    | Intended lookup type. Current working values are `username`, `userid`. |
+| `id`      | Lookup value. The handler trims and lowercases this value.             |
 
 Success status: `200`.
 
@@ -323,14 +323,9 @@ Success response:
 
 Behavior:
 
-- Rejects missing `type` with `400`.
-- Rejects missing `id` with `400`.
-- Trims and lowercases both path values.
+- Rejects missing or incorrect `type` with `400`.
+- Rejects missing or empty `id` with `400`.
 - Looks up the user and returns only public fields.
-
-Current inconsistency:
-
-- The service contains a branch for `type === "userId"`, but the handler lowercases the type before calling the service. That means an incoming `userId` becomes `userid` and does not match the service branch. As written, lookup by user ID does not work through this endpoint.
 
 Notable errors:
 
